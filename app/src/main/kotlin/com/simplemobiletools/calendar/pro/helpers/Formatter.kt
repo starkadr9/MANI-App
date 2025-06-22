@@ -107,9 +107,25 @@ object Formatter {
     fun getUTCDateTimeFromTS(ts: Long) = DateTime(ts * 1000L, DateTimeZone.UTC)
 
     // use manually translated month names, as DateFormat and Joda have issues with a lot of languages
-    fun getMonthName(context: Context, id: Int) = context.resources.getStringArray(com.simplemobiletools.commons.R.array.months)[id - 1]
+    fun getMonthName(context: Context, id: Int) = if (context.config.useLunisolarCalendar) {
+        getLunisolarMonthName(context, id)
+    } else {
+        context.resources.getStringArray(com.simplemobiletools.commons.R.array.months)[id - 1]
+    }
 
-    fun getShortMonthName(context: Context, id: Int) = context.resources.getStringArray(com.simplemobiletools.commons.R.array.months_short)[id - 1]
+    fun getShortMonthName(context: Context, id: Int) = if (context.config.useLunisolarCalendar) {
+        getLunisolarMonthName(context, id).take(3)
+    } else {
+        context.resources.getStringArray(com.simplemobiletools.commons.R.array.months_short)[id - 1]
+    }
+
+    private fun getLunisolarMonthName(context: Context, monthNum: Int): String {
+        val monthNames = arrayOf(
+            "First Moon", "Second Moon", "Third Moon", "Fourth Moon", "Fifth Moon", "Sixth Moon",
+            "Seventh Moon", "Eighth Moon", "Ninth Moon", "Tenth Moon", "Eleventh Moon", "Twelfth Moon", "Thirteenth Moon"
+        )
+        return if (monthNum in 1..13) monthNames[monthNum - 1] else "Unknown Moon"
+    }
 
     fun getHourPattern(context: Context) = if (context.config.use24HourFormat) PATTERN_HOURS_24 else PATTERN_HOURS_12
 
@@ -138,4 +154,42 @@ object Formatter {
     fun getShiftedLocalTS(ts: Long) = getShiftedTS(dateTime = getUTCDateTimeFromTS(ts), toZone = DateTimeZone.getDefault())
 
     fun getShiftedUtcTS(ts: Long) = getShiftedTS(dateTime = getDateTimeFromTS(ts), toZone = DateTimeZone.UTC)
+
+    // === LUNISOLAR CALENDAR FUNCTIONS ===
+    
+    /**
+     * Convert Gregorian date to Lunisolar display format
+     */
+    fun getLunisolarDateFromCode(context: Context, dayCode: String): String {
+        val dateTime = getDateTimeFromCode(dayCode)
+        val lunarDay = LunisolarCalendar.gregorianToLunar(
+            dateTime.year, dateTime.monthOfYear, dateTime.dayOfMonth
+        )
+        
+        if (lunarDay.lunarDay == 0) return getDateFromCode(context, dayCode) // Fallback to Gregorian
+        
+        val monthName = getLunisolarMonthName(context, lunarDay.lunarMonth)
+        return "${lunarDay.lunarDay} $monthName ${lunarDay.lunarYear}"
+    }
+
+    /**
+     * Get lunisolar month name with leap month indication
+     */
+    fun getLunisolarMonthYear(context: Context, lunarYear: Int, lunarMonth: Int): String {
+        val monthName = getLunisolarMonthName(context, lunarMonth)
+        val isLeapYear = LunisolarCalendar.isLunarLeapYear(lunarYear)
+        val leapIndicator = if (isLeapYear && lunarMonth == 13) " (Leap)" else ""
+        return "$monthName $lunarYear$leapIndicator"
+    }
+
+    /**
+     * Convert Unix timestamp to lunisolar date components
+     */
+    fun getUnixTSToLunarComponents(ts: Long): Triple<Int, Int, Int> {
+        val dateTime = getDateTimeFromTS(ts)
+        val lunarDay = LunisolarCalendar.gregorianToLunar(
+            dateTime.year, dateTime.monthOfYear, dateTime.dayOfMonth
+        )
+        return Triple(lunarDay.lunarYear, lunarDay.lunarMonth, lunarDay.lunarDay)
+    }
 }

@@ -266,6 +266,10 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(ALLOW_CREATING_TASKS, true)
         set(allowCreatingTasks) = prefs.edit().putBoolean(ALLOW_CREATING_TASKS, allowCreatingTasks).apply()
 
+    var useLunisolarCalendar: Boolean
+        get() = prefs.getBoolean(USE_LUNISOLAR_CALENDAR, false)
+        set(useLunisolarCalendar) = prefs.edit().putBoolean(USE_LUNISOLAR_CALENDAR, useLunisolarCalendar).apply()
+
     var wasFilteredOutWarningShown: Boolean
         get() = prefs.getBoolean(WAS_FILTERED_OUT_WARNING_SHOWN, false)
         set(wasFilteredOutWarningShown) = prefs.edit().putBoolean(WAS_FILTERED_OUT_WARNING_SHOWN, wasFilteredOutWarningShown).apply()
