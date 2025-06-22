@@ -120,7 +120,9 @@ object Formatter {
     }
 
     private fun getLunisolarMonthName(context: Context, monthNum: Int): String {
-        return LunisolarCalendar.getCustomMonthName(monthNum)
+        val monthNamesString = context.config.lunisolarMonthNames
+        val monthNames = monthNamesString.split(",")
+        return if (monthNum in 1..monthNames.size) monthNames[monthNum - 1] else "Unknown Moon"
     }
 
     fun getHourPattern(context: Context) = if (context.config.use24HourFormat) PATTERN_HOURS_24 else PATTERN_HOURS_12
@@ -169,13 +171,14 @@ object Formatter {
     }
 
     /**
-     * Get lunisolar month name with leap month indication
+     * Get lunisolar month name with leap month indication and Eld year
      */
     fun getLunisolarMonthYear(context: Context, lunarYear: Int, lunarMonth: Int): String {
         val monthName = getLunisolarMonthName(context, lunarMonth)
         val isLeapYear = LunisolarCalendar.isLunarLeapYear(lunarYear)
         val leapIndicator = if (isLeapYear && lunarMonth == 13) " (Leap)" else ""
-        return "$monthName $lunarYear$leapIndicator"
+        val eldYear = LunisolarCalendar.calculateEldYear(lunarYear)
+        return "$monthName $lunarYear • $eldYear Eld$leapIndicator"
     }
 
     /**

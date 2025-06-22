@@ -183,6 +183,28 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
                     val dayNumber = day.value.toString()
 
                     val textPaint = getTextPaint(day)
+                    
+                    // Check for astronomical events and highlight the entire cell
+                    if (context.config.useLunisolarCalendar) {
+                        val dateTime = Formatter.getDateTimeFromCode(day.code)
+                        val astronomicalEvent = getAstronomicalEvent(dateTime.year, dateTime.monthOfYear, dateTime.dayOfMonth)
+                        if (astronomicalEvent != null) {
+                            val highlightColor = when (astronomicalEvent) {
+                                "WS" -> 0x334CAF50.toInt() // Winter Solstice - Green background
+                                "SS" -> 0x33FF9800.toInt() // Summer Solstice - Orange background
+                                "SE" -> 0x339C27B0.toInt() // Spring Equinox - Purple background
+                                "FE" -> 0x33795548.toInt() // Fall Equinox - Brown background
+                                else -> 0x33CCCCCC.toInt()
+                            }
+                            val highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                                color = highlightColor
+                                style = Paint.Style.FILL
+                            }
+                            // Draw background highlight for the entire cell
+                            canvas.drawRect(xPos, yPos - weekDaysLetterHeight, xPos + dayWidth, yPos + dayHeight - weekDaysLetterHeight, highlightPaint)
+                        }
+                    }
+                    
                     if (selectedDayCoords.x != -1 && x == selectedDayCoords.x && y == selectedDayCoords.y) {
                         canvas.drawCircle(xPosCenter, yPos + textPaint.textSize * 0.7f, textPaint.textSize * 0.8f, circleStrokePaint)
                         if (day.isToday) {
@@ -210,11 +232,8 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
                     if (context.config.useLunisolarCalendar) {
                         drawMoonPhaseIcon(canvas, day, xPosCenter, yPos + textPaint.textSize * 1.5f)
                         
-                        // Draw solstice/equinox indicators
-                        drawAstronomicalEvent(canvas, day, xPosCenter, yPos + textPaint.textSize * 2.2f)
-                        
-                        // Draw holiday indicators
-                        drawHolidayIndicator(canvas, day, xPosCenter, yPos + textPaint.textSize * 2.8f)
+                        // Astronomical events (solstices/equinoxes) are now handled as cell highlights above
+                        // Germanic holidays are now real calendar events, not visual indicators
                     }
                     
                     dayVerticalOffsets.put(day.indexOnMonthView, (verticalOffset + textPaint.textSize * 2).toInt())
@@ -492,17 +511,17 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
                 strokeWidth = 1f
             }
             
-            val radius = textPaint.textSize * 0.15f
+            val radius = textPaint.textSize * 0.3f  // Much larger moon icons
             
             // Draw moon phase based on calculation
             when (moonPhase) {
-                LunisolarCalendar.MoonPhase.NEW_MOON -> {
-                    // New moon - empty circle
-                    canvas.drawCircle(xCenter, yPos, radius, moonStrokePaint)
-                }
                 LunisolarCalendar.MoonPhase.FULL_MOON -> {
-                    // Full moon - filled circle
+                    // Full moon - filled circle (months start with full moon)
                     canvas.drawCircle(xCenter, yPos, radius, moonPaint)
+                }
+                LunisolarCalendar.MoonPhase.NEW_MOON -> {
+                    // New moon - empty circle  
+                    canvas.drawCircle(xCenter, yPos, radius, moonStrokePaint)
                 }
                 LunisolarCalendar.MoonPhase.FIRST_QUARTER -> {
                     // First quarter - half filled (right side)
@@ -568,11 +587,11 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
                     textAlign = Paint.Align.CENTER
                 }
                 
-                // Draw small colored dot with text
-                val radius = textPaint.textSize * 0.08f
+                // Draw larger colored dot with text
+                val radius = textPaint.textSize * 0.2f  // Much larger
                 canvas.drawCircle(xCenter, yPos, radius, eventPaint)
                 
-                // Draw abbreviation below
+                // Draw abbreviation below in larger text
                 canvas.drawText(astronomicalEvent, xCenter, yPos + radius + eventPaint.textSize, eventPaint)
             }
         } catch (e: Exception) {
@@ -603,40 +622,5 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
         }
     }
 
-    private fun drawHolidayIndicator(canvas: Canvas, day: DayMonthly, xCenter: Float, yPos: Float) {
-        try {
-            val dayCode = day.code
-            val dateTime = Formatter.getDateTimeFromCode(dayCode)
-            
-            // Check if this date is a holiday
-            val holiday = LunisolarHolidays.getHolidayForDate(dateTime.year, dateTime.monthOfYear, dateTime.dayOfMonth)
-            
-            if (holiday != null) {
-                val holidayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = holiday.color
-                    style = Paint.Style.FILL
-                    textSize = textPaint.textSize * 0.3f
-                    textAlign = Paint.Align.CENTER
-                }
-                
-                // Draw small star/diamond shape for holidays
-                val size = textPaint.textSize * 0.1f
-                val path = android.graphics.Path().apply {
-                    moveTo(xCenter, yPos - size)           // Top point
-                    lineTo(xCenter + size * 0.6f, yPos)    // Right point
-                    lineTo(xCenter, yPos + size)           // Bottom point  
-                    lineTo(xCenter - size * 0.6f, yPos)    // Left point
-                    close()
-                }
-                
-                canvas.drawPath(path, holidayPaint)
-                
-                // Draw holiday abbreviation below (first 2 chars)
-                val abbreviation = holiday.name.take(2).uppercase()
-                canvas.drawText(abbreviation, xCenter, yPos + size + holidayPaint.textSize, holidayPaint)
-            }
-        } catch (e: Exception) {
-            // If calculation fails, don't draw anything
-        }
-    }
+    // Germanic holidays are now handled as real calendar events
 }

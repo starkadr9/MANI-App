@@ -575,27 +575,41 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
     private fun addHolidays() {
         val items = getHolidayRadioItems()
+        
+        // Add Germanic Holidays option if lunisolar calendar is enabled
+        if (config.useLunisolarCalendar) {
+            items.add(0, RadioItem(items.size + 1, "Germanic Traditional Holidays", "GERMANIC_HOLIDAYS"))
+        }
+        
         RadioGroupDialog(this, items) { selectedHoliday ->
-            SetRemindersDialog(this, OTHER_EVENT) {
-                val reminders = it
-                toast(com.simplemobiletools.commons.R.string.importing)
-                ensureBackgroundThread {
-                    val holidays = getString(R.string.holidays)
-                    var eventTypeId = eventsHelper.getEventTypeIdWithClass(HOLIDAY_EVENT)
-                    if (eventTypeId == -1L) {
-                        eventTypeId = eventsHelper.createPredefinedEventType(holidays, R.color.default_holidays_color, HOLIDAY_EVENT, true)
-                    }
-                    val result = IcsImporter(this).importEvents(selectedHoliday as String, eventTypeId, 0, false, reminders)
-                    handleParseResult(result)
-                    if (result != ImportResult.IMPORT_FAIL) {
-                        runOnUiThread {
-                            updateViewPager()
-                            setupQuickFilter()
+            if (selectedHoliday == "GERMANIC_HOLIDAYS") {
+                addGermanicHolidays()
+            } else {
+                SetRemindersDialog(this, OTHER_EVENT) {
+                    val reminders = it
+                    toast(com.simplemobiletools.commons.R.string.importing)
+                    ensureBackgroundThread {
+                        val holidays = getString(R.string.holidays)
+                        var eventTypeId = eventsHelper.getEventTypeIdWithClass(HOLIDAY_EVENT)
+                        if (eventTypeId == -1L) {
+                            eventTypeId = eventsHelper.createPredefinedEventType(holidays, R.color.default_holidays_color, HOLIDAY_EVENT, true)
+                        }
+                        val result = IcsImporter(this).importEvents(selectedHoliday as String, eventTypeId, 0, false, reminders)
+                        handleParseResult(result)
+                        if (result != ImportResult.IMPORT_FAIL) {
+                            runOnUiThread {
+                                updateViewPager()
+                                setupQuickFilter()
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun addGermanicHolidays() {
+        toast("Germanic holidays feature will be available in future updates")
     }
 
     private fun tryAddBirthdays() {

@@ -290,7 +290,19 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(AUTO_BACKUP_PAST_ENTRIES, true)
         set(autoBackupPastEntries) = prefs.edit().putBoolean(AUTO_BACKUP_PAST_ENTRIES, autoBackupPastEntries).apply()
 
+    // Lunisolar Calendar Configuration
+    var lunisolarEpoch: Int
+        get() = prefs.getInt(LUNISOLAR_EPOCH, 750)
+        set(lunisolarEpoch) = prefs.edit().putInt(LUNISOLAR_EPOCH, lunisolarEpoch).apply()
+
+    var lunisolarMonthNames: String
+        get() = prefs.getString(LUNISOLAR_MONTH_NAMES, "Wulf Moon,Horn Moon,Lenting Moon,Eostre Moon,Thrimilce Moon,Æftera Litha,Weod Moon,Hægest Moon,Halig Moon,Winter Moon,Blot Moon,Yule Moon,Long Night Moon") ?: "Wulf Moon,Horn Moon,Lenting Moon,Eostre Moon,Thrimilce Moon,Æftera Litha,Weod Moon,Hægest Moon,Halig Moon,Winter Moon,Blot Moon,Yule Moon,Long Night Moon"
+        set(lunisolarMonthNames) = prefs.edit().putString(LUNISOLAR_MONTH_NAMES, lunisolarMonthNames).apply()
+
     init {
         useLunisolarCalendar = true
+        // Apply settings to LunisolarCalendar
+        LunisolarCalendar.setCustomEpoch(lunisolarEpoch)
+        LunisolarCalendar.setCustomMonthNames(lunisolarMonthNames.split(",").toTypedArray())
     }
 }

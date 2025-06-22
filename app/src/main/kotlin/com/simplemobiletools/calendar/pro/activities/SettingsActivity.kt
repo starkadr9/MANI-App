@@ -68,6 +68,9 @@ class SettingsActivity : SimpleActivity() {
         setupManageQuickFilterEventTypes()
         setupHourFormat()
         setupAllowCreatingTasks()
+        setupLunisolarCalendar()
+        setupLunisolarEpoch()
+        setupLunisolarMonthNames()
         setupStartWeekOn()
         setupHighlightWeekends()
         setupHighlightWeekendsColor()
@@ -115,6 +118,7 @@ class SettingsActivity : SimpleActivity() {
         arrayOf(
             binding.settingsColorCustomizationSectionLabel,
             binding.settingsGeneralSettingsLabel,
+            binding.settingsLunisolarLabel,
             binding.settingsRemindersLabel,
             binding.settingsCaldavLabel,
             binding.settingsNewEventsLabel,
@@ -1091,6 +1095,84 @@ class SettingsActivity : SimpleActivity() {
 
             setupSettingItems()
             updateWidgets()
+        }
+    }
+
+    private fun setupLunisolarCalendar() {
+        binding.settingsLunisolarCalendar.isChecked = config.useLunisolarCalendar
+        binding.settingsLunisolarCalendarHolder.setOnClickListener {
+            binding.settingsLunisolarCalendar.toggle()
+            config.useLunisolarCalendar = binding.settingsLunisolarCalendar.isChecked
+            updateWidgets()
+        }
+    }
+
+    private fun setupLunisolarEpoch() {
+        binding.settingsLunisolarEpoch.text = "${config.lunisolarEpoch} BC"
+        binding.settingsLunisolarEpochHolder.setOnClickListener {
+            val currentEpoch = config.lunisolarEpoch
+            val items = arrayListOf(
+                RadioItem(750, "750 BC (Traditional Germanic)"),
+                RadioItem(800, "800 BC (Early Iron Age)"),
+                RadioItem(700, "700 BC (Late Iron Age)"),
+                RadioItem(500, "500 BC (Classical Period)"),
+                RadioItem(1000, "1000 BC (Bronze Age)")
+            )
+
+            RadioGroupDialog(this, items, currentEpoch) {
+                config.lunisolarEpoch = it as Int
+                binding.settingsLunisolarEpoch.text = "${it} BC"
+                updateWidgets()
+            }
+        }
+    }
+
+    private fun setupLunisolarMonthNames() {
+        updateLunisolarMonthNamesText()
+        binding.settingsLunisolarMonthNamesHolder.setOnClickListener {
+            val items = arrayListOf(
+                RadioItem(0, "Germanic Traditional"),
+                RadioItem(1, "Norse Traditional"),
+                RadioItem(2, "Anglo-Saxon"),
+                RadioItem(3, "Custom...")
+            )
+
+            RadioGroupDialog(this, items, 0) { selectedOption ->
+                when (selectedOption) {
+                    0 -> {
+                        config.lunisolarMonthNames = "Wulf Moon,Horn Moon,Lenting Moon,Eostre Moon,Thrimilce Moon,Æfte Liða,Ære Liða,Weod Moon,Haleg Moon,Winter Moon,Blot Moon,Ære Jól,Æfte Jól"
+                    }
+                    1 -> {
+                        config.lunisolarMonthNames = "Ylir,Mörsugur,Þorri,Góa,Einmánuður,Harpa,Skerpla,Solmánuður,Heyannir,Tvímánuður,Gormánuður,Frermánuður,Jólmánuður"
+                    }
+                    2 -> {
+                        config.lunisolarMonthNames = "Æfterra Géola,Solmónaþ,Hréþmónaþ,Éostermónaþ,Þrimilcemónaþ,Ærra Liþa,Æfterra Liþa,Weodmónaþ,Háligmónaþ,Winterfylleþ,Blótmónaþ,Ærra Géola,Æfterra Géola"
+                    }
+                    3 -> {
+                        // Custom input dialog
+                        val currentNames = config.lunisolarMonthNames.split(",")
+                        // For now, just show a toast - full custom editor would be complex
+                        toast("Custom month names editor coming soon!")
+                        return@RadioGroupDialog
+                    }
+                }
+                updateLunisolarMonthNamesText()
+                updateWidgets()
+            }
+        }
+    }
+
+    private fun updateLunisolarMonthNamesText() {
+        val currentNames = config.lunisolarMonthNames
+        val defaultGermanic = "Wulf Moon,Horn Moon,Lenting Moon,Eostre Moon,Thrimilce Moon,Æfte Liða,Ære Liða,Weod Moon,Haleg Moon,Winter Moon,Blot Moon,Ære Jól,Æfte Jól"
+        val norse = "Ylir,Mörsugur,Þorri,Góa,Einmánuður,Harpa,Skerpla,Solmánuður,Heyannir,Tvímánuður,Gormánuður,Frermánuður,Jólmánuður"
+        val angloSaxon = "Æfterra Géola,Solmónaþ,Hréþmónaþ,Éostermónaþ,Þrimilcemónaþ,Ærra Liþa,Æfterra Liþa,Weodmónaþ,Háligmónaþ,Winterfylleþ,Blótmónaþ,Ærra Géola,Æfterra Géola"
+        
+        binding.settingsLunisolarMonthNames.text = when (currentNames) {
+            defaultGermanic -> "Germanic Traditional"
+            norse -> "Norse Traditional"
+            angloSaxon -> "Anglo-Saxon"
+            else -> "Custom"
         }
     }
 

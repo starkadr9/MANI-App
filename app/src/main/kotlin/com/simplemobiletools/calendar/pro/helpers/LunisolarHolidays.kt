@@ -1,8 +1,11 @@
 package com.simplemobiletools.calendar.pro.helpers
 
+import android.content.Context
+import org.joda.time.DateTime
+
 /**
  * Germanic Lunisolar Holiday System
- * Calculates traditional Germanic holidays based on astronomical events and lunar calendar
+ * Simplified version for basic holiday information
  */
 object LunisolarHolidays {
 
@@ -10,20 +13,27 @@ object LunisolarHolidays {
         val name: String,
         val description: String,
         val type: HolidayType,
-        val color: Int = 0xFF4CAF50.toInt() // Default green
+        val color: Int = 0xFF4CAF50.toInt()
     )
 
     enum class HolidayType {
         ASTRONOMICAL,    // Based on solstices/equinoxes
         LUNAR,          // Based on moon phases
-        FIXED_LUNAR,    // Fixed lunar date
         SEASONAL        // Based on astronomical + lunar calculations
     }
 
     /**
-     * Get all holidays for a specific Gregorian year
+     * Get available years for holiday creation (current year ± 5 years)
      */
-    fun getHolidaysForYear(gregorianYear: Int): Map<String, Holiday> {
+    fun getAvailableYearsForHolidays(): List<Int> {
+        val currentYear = DateTime.now().year
+        return (currentYear - 5..currentYear + 5).toList()
+    }
+
+    /**
+     * Get all Germanic holidays for a specific year
+     */
+    fun getGermanicHolidaysForYear(gregorianYear: Int): Map<String, Holiday> {
         val holidays = mutableMapOf<String, Holiday>()
         
         // Add astronomical holidays
@@ -51,7 +61,7 @@ object LunisolarHolidays {
             val yuleDayCode = "${wsYear}${wsMonth.toString().padStart(2, '0')}${wsDay.toString().padStart(2, '0')}"
             holidays[yuleDayCode] = Holiday(
                 "Yule - Jól", 
-                "Winter Solstice, longest night of the year, rebirth of the sun",
+                "Winter Solstice, longest night of the year, rebirth of the sun.",
                 HolidayType.ASTRONOMICAL,
                 0xFF4CAF50.toInt()
             )
@@ -62,7 +72,7 @@ object LunisolarHolidays {
             val ostaraDayCode = "${seYear}${seMonth.toString().padStart(2, '0')}${seDay.toString().padStart(2, '0')}"
             holidays[ostaraDayCode] = Holiday(
                 "Ostara - Eostre",
-                "Spring Equinox, balance of light and dark, renewal and fertility",
+                "Spring Equinox, balance of light and dark, renewal and fertility.",
                 HolidayType.ASTRONOMICAL,
                 0xFF9C27B0.toInt()
             )
@@ -73,7 +83,7 @@ object LunisolarHolidays {
             val lithaDayCode = "${ssYear}${ssMonth.toString().padStart(2, '0')}${ssDay.toString().padStart(2, '0')}"
             holidays[lithaDayCode] = Holiday(
                 "Litha - Midsummer",
-                "Summer Solstice, longest day of the year, peak of solar power",
+                "Summer Solstice, longest day of the year, peak of solar power.",
                 HolidayType.ASTRONOMICAL,
                 0xFFFF9800.toInt()
             )
@@ -84,7 +94,7 @@ object LunisolarHolidays {
             val harvestDayCode = "${feYear}${feMonth.toString().padStart(2, '0')}${feDay.toString().padStart(2, '0')}"
             holidays[harvestDayCode] = Holiday(
                 "Harvest Home - Mabon",
-                "Autumn Equinox, second harvest, balance and thanksgiving",
+                "Autumn Equinox, second harvest, balance and thanksgiving.",
                 HolidayType.ASTRONOMICAL,
                 0xFF795548.toInt()
             )
@@ -103,31 +113,29 @@ object LunisolarHolidays {
         val holidays = mutableMapOf<String, Holiday>()
         
         try {
-            // Lunar New Year - start of lunisolar calendar
+            // Wolf Moon Rising (first full moon of lunisolar year)
             val lunarNewYearJD = LunisolarCalendar.calculateLunarNewYearJD(year)
             val (lnyYear, lnyMonth, lnyDay) = LunisolarCalendar.julianDayToGregorian(lunarNewYearJD)
             val newYearDayCode = "${lnyYear}${lnyMonth.toString().padStart(2, '0')}${lnyDay.toString().padStart(2, '0')}"
             holidays[newYearDayCode] = Holiday(
                 "Wolf Moon Rising",
-                "Lunisolar New Year, first full moon after winter solstice",
+                "First full moon of the lunisolar year, marking the beginning of the Germanic calendar.",
                 HolidayType.LUNAR,
-                0xFF3F51B5.toInt()
+                0xFF2196F3.toInt()
             )
             
-            // Mid-year celebration - 6th or 7th month
-            val isLeapYear = LunisolarCalendar.isLunarLeapYear(year)
-            val midYearMonth = if (isLeapYear) 7 else 6
-            val midYearGregorian = LunisolarCalendar.lunarToGregorian(year, midYearMonth, 15)
-            if (midYearGregorian != null) {
-                val (myYear, myMonth, myDay) = midYearGregorian
-                val midYearDayCode = "${myYear}${myMonth.toString().padStart(2, '0')}${myDay.toString().padStart(2, '0')}"
-                holidays[midYearDayCode] = Holiday(
-                    "Mead Moon Festival",
-                    "Mid-year celebration, time of abundance and community",
-                    HolidayType.LUNAR,
-                    0xFFFFEB3B.toInt()
-                )
-            }
+            // Mead Moon Festival (summer full moon - approximate)
+            val summerSolstice = LunisolarCalendar.calculateSolsticeEquinoxJDE(year, 2)
+            // Find full moon closest to summer solstice
+            val meadMoonJD = summerSolstice + 15 // Approximate
+            val (mmYear, mmMonth, mmDay) = LunisolarCalendar.julianDayToGregorian(meadMoonJD)
+            val meadMoonDayCode = "${mmYear}${mmMonth.toString().padStart(2, '0')}${mmDay.toString().padStart(2, '0')}"
+            holidays[meadMoonDayCode] = Holiday(
+                "Mead Moon Festival",
+                "Summer full moon celebration, time of abundance and community gathering.",
+                HolidayType.LUNAR,
+                0xFFFFEB3B.toInt()
+            )
             
         } catch (e: Exception) {
             // If calculation fails, skip lunar holidays for this year
@@ -137,34 +145,28 @@ object LunisolarHolidays {
     }
 
     /**
-     * Get seasonal holidays that combine astronomical and cultural timing
+     * Get seasonal holidays based on combined calculations
      */
     private fun getSeasonalHolidays(year: Int): Map<String, Holiday> {
         val holidays = mutableMapOf<String, Holiday>()
         
         try {
-            // Winter Nights - traditionally October/November
-            // Calculate as first new moon after October 1st
-            val oct1JD = LunisolarCalendar.gregorianToJulianDay(year, 10, 1)
-            val winterNightsJD = LunisolarCalendar.findNextPhaseJD(oct1JD, 0) // Next new moon
-            val (wnYear, wnMonth, wnDay) = LunisolarCalendar.julianDayToGregorian(winterNightsJD)
-            val winterNightsDayCode = "${wnYear}${wnMonth.toString().padStart(2, '0')}${wnDay.toString().padStart(2, '0')}"
+            // Winter Nights (mid-October, preparation for winter)
+            val winterNightsDate = DateTime(year, 10, 15, 0, 0)
+            val winterNightsDayCode = "${year}1015"
             holidays[winterNightsDayCode] = Holiday(
                 "Winter Nights - Vetrnáttablót",
-                "Beginning of winter season, honoring ancestors and the Wild Hunt",
+                "Beginning of winter season, honoring the ancestors and preparing for the dark months.",
                 HolidayType.SEASONAL,
-                0xFF607D8B.toInt()
+                0xFF3F51B5.toInt()
             )
             
-            // Dísablót - early spring (between winter solstice and spring equinox)
-            val winterSolstice = LunisolarCalendar.calculateSolsticeEquinoxJDE(year, 0)
-            val springEquinox = LunisolarCalendar.calculateSolsticeEquinoxJDE(year, 1)
-            val midWinterSpring = (winterSolstice + springEquinox) / 2
-            val (dsYear, dsMonth, dsDay) = LunisolarCalendar.julianDayToGregorian(midWinterSpring)
-            val disablotDayCode = "${dsYear}${dsMonth.toString().padStart(2, '0')}${dsDay.toString().padStart(2, '0')}"
+            // Dísablót (early February, honoring female spirits)
+            val disablotDate = DateTime(year, 2, 2, 0, 0)
+            val disablotDayCode = "${year}0202"
             holidays[disablotDayCode] = Holiday(
-                "Dísablót",
-                "Honoring the Dísir (female spirits), protection and prosperity",
+                "Dísablót - Disting",
+                "Festival honoring the Dísir (female spirits/goddesses), protection of family and community.",
                 HolidayType.SEASONAL,
                 0xFFE91E63.toInt()
             )
@@ -177,22 +179,13 @@ object LunisolarHolidays {
     }
 
     /**
-     * Check if a specific date is a holiday
+     * Get list of Germanic holiday names for filtering
      */
-    fun getHolidayForDate(year: Int, month: Int, day: Int): Holiday? {
-        val dayCode = "${year}${month.toString().padStart(2, '0')}${day.toString().padStart(2, '0')}"
-        return getHolidaysForYear(year)[dayCode]
-    }
-
-    /**
-     * Get all holiday names (for settings/customization)
-     */
-    fun getAvailableHolidayTypes(): List<String> {
+    fun getGermanicHolidayNames(): List<String> {
         return listOf(
-            "Astronomical Events (Solstices/Equinoxes)",
-            "Lunar Celebrations", 
-            "Seasonal Festivals",
-            "Germanic Traditional Holidays"
+            "Yule", "Jól", "Ostara", "Eostre", "Litha", "Midsummer", 
+            "Harvest Home", "Mabon", "Wolf Moon", "Mead Moon", 
+            "Winter Nights", "Vetrnáttablót", "Dísablót", "Disting"
         )
     }
 } 
