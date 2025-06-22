@@ -75,6 +75,7 @@ class SettingsActivity : SimpleActivity() {
         setupLunisolarCalendar()
         setupLunisolarEpoch()
         setupLunisolarMonthNames()
+        setupUseEldYears()
         setupStartWeekOn()
         setupHighlightWeekends()
         setupHighlightWeekendsColor()
@@ -1261,12 +1262,23 @@ class SettingsActivity : SimpleActivity() {
                     LunisolarCalendar.setCustomMonthNames(newNames.toTypedArray())
                     updateLunisolarMonthNamesText()
                     updateWidgets()
+                    toast("Month names saved successfully!")
                 } else {
                     toast("Please enter at least 12 month names")
                 }
             }
             .setNegativeButton("Cancel", null)
+            .setCancelable(true)
             .show()
+    }
+
+    private fun setupUseEldYears() = binding.apply {
+        settingsUseEldYears.isChecked = config.useEldYears
+        settingsUseEldYearsHolder.setOnClickListener {
+            settingsUseEldYears.toggle()
+            config.useEldYears = settingsUseEldYears.isChecked
+            updateWidgets()
+        }
     }
 
     private fun tryImportEvents() {

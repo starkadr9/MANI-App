@@ -148,6 +148,7 @@ const val AUTO_BACKUP_TASKS = "auto_backup_tasks"
 const val AUTO_BACKUP_PAST_ENTRIES = "auto_backup_past_entries"
 const val LAST_AUTO_BACKUP_TIME = "last_auto_backup_time"
 const val USE_LUNISOLAR_CALENDAR = "use_lunisolar_calendar"
+const val USE_ELD_YEARS = "use_eld_years"
 
 // repeat_rule for monthly and yearly repetition
 const val REPEAT_SAME_DAY = 1                           // i.e. 25th every month, or 3rd june (if yearly repetition)

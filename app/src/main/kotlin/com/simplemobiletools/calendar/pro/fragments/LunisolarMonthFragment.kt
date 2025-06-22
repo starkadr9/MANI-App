@@ -29,6 +29,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
     private lateinit var monthTitle: TextView
     private lateinit var prevButton: ImageView
     private lateinit var nextButton: ImageView
+    private lateinit var todayButton: TextView
     private lateinit var calendarGrid: LinearLayout
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -37,6 +38,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         monthTitle = view.findViewById(R.id.month_title)
         prevButton = view.findViewById(R.id.prev_month)
         nextButton = view.findViewById(R.id.next_month)
+        todayButton = view.findViewById(R.id.today_button)
         calendarGrid = view.findViewById(R.id.calendar_grid)
         
         // Apply theme colors
@@ -44,6 +46,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         val primaryColor = requireContext().getProperPrimaryColor()
         
         monthTitle.setTextColor(textColor)
+        todayButton.setTextColor(textColor)
         prevButton.applyColorFilter(textColor)
         nextButton.applyColorFilter(textColor)
         
@@ -52,6 +55,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         
         prevButton.setOnClickListener { navigateToPreviousMonth() }
         nextButton.setOnClickListener { navigateToNextMonth() }
+        todayButton.setOnClickListener { goToToday() }
         monthTitle.setOnClickListener { 
             (activity as? MainActivity)?.showGoToDateDialog()
         }
@@ -87,13 +91,10 @@ class LunisolarMonthFragment : MyFragmentHolder() {
     }
     
     private fun initializeCurrentMonth() {
-        // Get current Gregorian date and convert to lunar
-        val now = org.joda.time.DateTime.now()
-        val lunar = LunisolarCalendar.gregorianToLunar(now.year, now.monthOfYear, now.dayOfMonth)
-        if (lunar.lunarDay > 0) {
-            currentLunarYear = lunar.lunarYear
-            currentLunarMonth = lunar.lunarMonth
-        }
+        val today = DateTime.now()
+        val lunarDate = LunisolarCalendar.gregorianToLunar(today.year, today.monthOfYear, today.dayOfMonth)
+        currentLunarYear = lunarDate.lunarYear
+        currentLunarMonth = lunarDate.lunarMonth
     }
     
     private fun navigateToPreviousMonth() {
@@ -124,15 +125,22 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         val config = Config(requireContext())
         val monthNames = config.lunisolarMonthNames.split(",")
         val epoch = config.lunisolarEpoch
+        val useEldYears = config.useEldYears
         
         val monthName = if (monthNames.isNotEmpty() && currentLunarMonth <= monthNames.size) {
-            monthNames[currentLunarMonth - 1].trim()
+            monthNames[currentLunarMonth - 1]
         } else {
             "Month $currentLunarMonth"
         }
         
-        val eldYear = currentLunarYear + epoch.toLong()
-        monthTitle.text = "$monthName $eldYear Eld"
+        val yearDisplay = if (useEldYears) {
+            val eldYear = currentLunarYear + epoch
+            "$eldYear Eld"
+        } else {
+            "$currentLunarYear AD"
+        }
+        
+        monthTitle.text = "$monthName $yearDisplay"
     }
     
     private fun buildCalendarGrid() {
@@ -247,6 +255,13 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             dayView.alpha = 1.0f
             dayView.setTextColor(textColor)
             
+            // Check if this is today
+            val gregorianDate = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, lunarDay)
+            val isToday = gregorianDate?.let { (year, month, day) ->
+                val today = DateTime.now()
+                year == today.year && month == today.monthOfYear && day == today.dayOfMonth
+            } ?: false
+            
             // Add moon phase symbol at start of month (full moon)
             if (lunarDay == 1) {
                 dayView.text = "🌕\n$lunarDay"
@@ -256,8 +271,15 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 dayView.setBackgroundColor(backgroundColor and 0x10FFFFFF.toInt()) // Very light background
             }
             
+            // Highlight today with a special border/background
+            if (isToday) {
+                dayView.setBackgroundColor(requireContext().getProperPrimaryColor())
+                dayView.setTextColor(0xFFFFFFFF.toInt()) // White text for contrast
+                dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nTODAY" else "${lunarDay}\nTODAY"
+            }
+            
             // Add holiday highlighting for major holidays (1st, 3rd, 6th, 9th months)
-            if (lunarDay <= 3) { // First 3 days of month
+            if (lunarDay <= 3 && !isToday) { // Don't override today highlighting
                 when (currentLunarMonth) {
                     1 -> {
                         dayView.setBackgroundColor(0xFF4CAF50.toInt()) // Green for Yule
@@ -282,14 +304,14 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 }
             }
             
-            // Add solstice/equinox highlighting
-            val gregorianDate = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, lunarDay)
-            if (gregorianDate != null) {
-                val jd = LunisolarCalendar.gregorianToJulianDay(gregorianDate.first, gregorianDate.second, gregorianDate.third)
-                val winterSolsticeJD = LunisolarCalendar.calculateWinterSolstice(gregorianDate.first)
-                val springEquinoxJD = LunisolarCalendar.calculateSpringEquinox(gregorianDate.first)
-                val summerSolsticeJD = LunisolarCalendar.calculateSummerSolstice(gregorianDate.first)
-                val fallEquinoxJD = LunisolarCalendar.calculateFallEquinox(gregorianDate.first)
+            // Add solstice/equinox highlighting (only if not today and not a holiday)
+            if (gregorianDate != null && !isToday && !(lunarDay <= 3 && listOf(1, 3, 6, 9).contains(currentLunarMonth))) {
+                val (year, month, day) = gregorianDate
+                val jd = LunisolarCalendar.gregorianToJulianDay(year, month, day)
+                val winterSolsticeJD = LunisolarCalendar.calculateWinterSolstice(year)
+                val springEquinoxJD = LunisolarCalendar.calculateSpringEquinox(year)
+                val summerSolsticeJD = LunisolarCalendar.calculateSummerSolstice(year)
+                val fallEquinoxJD = LunisolarCalendar.calculateFallEquinox(year)
                 
                 when {
                     kotlin.math.abs(jd - winterSolsticeJD) < 0.5 -> {
@@ -319,10 +341,11 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             dayView.setOnClickListener {
                 val gregorianDate = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, lunarDay)
                 if (gregorianDate != null) {
+                    val (year, month, day) = gregorianDate
                     // Switch to daily view for the selected day
                     val mainActivity = activity as? MainActivity
                     mainActivity?.let { mainActivity ->
-                        val dateTime = DateTime(gregorianDate.first, gregorianDate.second, gregorianDate.third, 0, 0)
+                        val dateTime = DateTime(year, month, day, 0, 0)
                         mainActivity.openDayFromMonthly(dateTime)
                     }
                 }
@@ -330,6 +353,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             
             // Add border using theme colors
             val bgColor = when {
+                isToday -> requireContext().getProperPrimaryColor()
                 lunarDay <= 3 && currentLunarMonth == 1 -> 0xFF4CAF50.toInt()
                 lunarDay <= 3 && currentLunarMonth == 3 -> 0xFFFF9800.toInt()
                 lunarDay <= 3 && currentLunarMonth == 6 -> 0xFFFFEB3B.toInt()

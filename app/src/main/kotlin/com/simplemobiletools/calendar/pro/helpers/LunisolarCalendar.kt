@@ -133,6 +133,12 @@ object LunisolarCalendar {
         }
     }
 
+    // Individual solstice/equinox functions for convenience
+    fun calculateWinterSolstice(year: Int): Double = calculateSolsticeEquinoxJDE(year, 0)
+    fun calculateSpringEquinox(year: Int): Double = calculateSolsticeEquinoxJDE(year, 1)
+    fun calculateSummerSolstice(year: Int): Double = calculateSolsticeEquinoxJDE(year, 2)
+    fun calculateFallEquinox(year: Int): Double = calculateSolsticeEquinoxJDE(year, 3)
+
     /**
      * Calculate true Julian Day for moon phase
      * phaseType: 0=NM, 1=FQ, 2=FM, 3=LQ

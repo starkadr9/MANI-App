@@ -39,6 +39,18 @@
             android:singleLine="true"
             android:ellipsize="end" />
 
+        <com.simplemobiletools.commons.views.MyTextView
+            android:id="@+id/today_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Today"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:layout_marginRight="8dp" />
+
         <ImageView
             android:id="@+id/next_month"
             android:layout_width="48dp"

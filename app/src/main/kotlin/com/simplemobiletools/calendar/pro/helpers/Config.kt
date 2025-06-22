@@ -299,6 +299,10 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getString(LUNISOLAR_MONTH_NAMES, "Wulf Moon,Horn Moon,Lenting Moon,Eostre Moon,Thrimilce Moon,Æftera Litha,Weod Moon,Hægest Moon,Halig Moon,Winter Moon,Blot Moon,Yule Moon,Long Night Moon") ?: "Wulf Moon,Horn Moon,Lenting Moon,Eostre Moon,Thrimilce Moon,Æftera Litha,Weod Moon,Hægest Moon,Halig Moon,Winter Moon,Blot Moon,Yule Moon,Long Night Moon"
         set(lunisolarMonthNames) = prefs.edit().putString(LUNISOLAR_MONTH_NAMES, lunisolarMonthNames).apply()
 
+    var useEldYears: Boolean
+        get() = prefs.getBoolean(USE_ELD_YEARS, true)
+        set(useEldYears) = prefs.edit().putBoolean(USE_ELD_YEARS, useEldYears).apply()
+
     init {
         // Apply settings to LunisolarCalendar when config is loaded
         LunisolarCalendar.setCustomEpoch(lunisolarEpoch)
