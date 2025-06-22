@@ -290,4 +290,7 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(AUTO_BACKUP_PAST_ENTRIES, true)
         set(autoBackupPastEntries) = prefs.edit().putBoolean(AUTO_BACKUP_PAST_ENTRIES, autoBackupPastEntries).apply()
 
+    init {
+        useLunisolarCalendar = true
+    }
 }
