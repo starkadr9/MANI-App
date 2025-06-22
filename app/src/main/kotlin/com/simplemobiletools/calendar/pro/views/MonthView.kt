@@ -203,6 +203,24 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
                             // Draw background highlight for the entire cell
                             canvas.drawRect(xPos, yPos - weekDaysLetterHeight, xPos + dayWidth, yPos + dayHeight - weekDaysLetterHeight, highlightPaint)
                         }
+                        
+                        // Check for holidays and highlight the entire cell
+                        val holiday = LunisolarHolidays.getHolidayForDate(dateTime)
+                        if (holiday != null) {
+                            val holidayColor = when (holiday.name) {
+                                "Yule" -> 0x334CAF50.toInt()           // Green background
+                                "Sumarmal" -> 0x33FF9800.toInt()      // Orange background  
+                                "Midsummer" -> 0x33FFEB3B.toInt()     // Yellow background
+                                "Winter Nights" -> 0x333F51B5.toInt() // Blue background
+                                else -> 0x33E91E63.toInt()            // Pink background
+                            }
+                            val holidayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                                color = holidayColor
+                                style = Paint.Style.FILL
+                            }
+                            // Draw background highlight for the entire cell
+                            canvas.drawRect(xPos, yPos - weekDaysLetterHeight, xPos + dayWidth, yPos + dayHeight - weekDaysLetterHeight, holidayPaint)
+                        }
                     }
                     
                     if (selectedDayCoords.x != -1 && x == selectedDayCoords.x && y == selectedDayCoords.y) {
@@ -228,12 +246,22 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
 
                     canvas.drawText(dayNumber, xPosCenter, yPos + textPaint.textSize, textPaint)
                     
-                    // Draw moon phase icon for lunisolar calendar
+                    // Draw moon phase icon and holiday notation for lunisolar calendar
                     if (context.config.useLunisolarCalendar) {
                         drawMoonPhaseIcon(canvas, day, xPosCenter, yPos + textPaint.textSize * 1.5f)
                         
-                        // Astronomical events (solstices/equinoxes) are now handled as cell highlights above
-                        // Germanic holidays are now real calendar events, not visual indicators
+                        // Draw holiday notation if this date is a holiday
+                        val dateTime = Formatter.getDateTimeFromCode(day.code)
+                        val holidayInfo = LunisolarHolidays.getHolidayDisplayInfo(dateTime)
+                        if (holidayInfo != null) {
+                            val holidayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                                color = if (day.isThisMonth) textColor else textColor.adjustAlpha(MEDIUM_ALPHA)
+                                textSize = textPaint.textSize * 0.5f
+                                textAlign = Paint.Align.CENTER
+                                isFakeBoldText = true
+                            }
+                            canvas.drawText(holidayInfo, xPosCenter, yPos + textPaint.textSize * 2.2f, holidayPaint)
+                        }
                     }
                     
                     dayVerticalOffsets.put(day.indexOnMonthView, (verticalOffset + textPaint.textSize * 2).toInt())

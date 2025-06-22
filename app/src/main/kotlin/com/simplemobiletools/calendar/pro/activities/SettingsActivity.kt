@@ -7,6 +7,10 @@ import android.content.Intent
 import android.media.AudioManager
 import android.media.RingtoneManager
 import android.os.Bundle
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -1116,13 +1120,43 @@ class SettingsActivity : SimpleActivity() {
                 RadioItem(800, "800 BC (Early Iron Age)"),
                 RadioItem(700, "700 BC (Late Iron Age)"),
                 RadioItem(500, "500 BC (Classical Period)"),
-                RadioItem(1000, "1000 BC (Bronze Age)")
+                RadioItem(1000, "1000 BC (Bronze Age)"),
+                RadioItem(-1, "Custom...")
             )
 
-            RadioGroupDialog(this, items, currentEpoch) {
-                config.lunisolarEpoch = it as Int
-                binding.settingsLunisolarEpoch.text = "${it} BC"
-                updateWidgets()
+            RadioGroupDialog(this, items, currentEpoch) { selectedOption ->
+                if (selectedOption == -1) {
+                    // Custom epoch input
+                    val input = EditText(this).apply {
+                        setText(currentEpoch.toString())
+                        inputType = android.text.InputType.TYPE_CLASS_NUMBER
+                        hint = "Enter year BC (e.g. 750)"
+                    }
+                    
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Custom Epoch Year")
+                        .setMessage("Enter the epoch year (BC):")
+                        .setView(input)
+                        .setPositiveButton("Set") { _, _ ->
+                            val yearText = input.text.toString()
+                            val year = yearText.toIntOrNull()
+                            if (year != null && year > 0) {
+                                config.lunisolarEpoch = year
+                                binding.settingsLunisolarEpoch.text = "${year} BC"
+                                LunisolarCalendar.setCustomEpoch(year)
+                                updateWidgets()
+                            } else {
+                                toast("Please enter a valid year")
+                            }
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                } else {
+                    config.lunisolarEpoch = selectedOption as Int
+                    binding.settingsLunisolarEpoch.text = "${selectedOption} BC"
+                    LunisolarCalendar.setCustomEpoch(selectedOption)
+                    updateWidgets()
+                }
             }
         }
     }
@@ -1150,9 +1184,7 @@ class SettingsActivity : SimpleActivity() {
                     }
                     3 -> {
                         // Custom input dialog
-                        val currentNames = config.lunisolarMonthNames.split(",")
-                        // For now, just show a toast - full custom editor would be complex
-                        toast("Custom month names editor coming soon!")
+                        showCustomMonthNamesDialog()
                         return@RadioGroupDialog
                     }
                 }
@@ -1174,6 +1206,67 @@ class SettingsActivity : SimpleActivity() {
             angloSaxon -> "Anglo-Saxon"
             else -> "Custom"
         }
+    }
+
+    private fun showCustomMonthNamesDialog() {
+        val currentNames = config.lunisolarMonthNames.split(",").toMutableList()
+        
+        // Ensure we have exactly 13 months (12 regular + 1 leap)
+        while (currentNames.size < 13) {
+            currentNames.add("Month ${currentNames.size + 1}")
+        }
+        
+        val scrollView = ScrollView(this)
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 16, 32, 16)
+        }
+        scrollView.addView(layout)
+        
+        val monthInputs = mutableListOf<EditText>()
+        val monthLabels = listOf(
+            "1st Month (Yule)", "2nd Month", "3rd Month (Sumarmal)", "4th Month", "5th Month", "6th Month (Midsummer)",
+            "7th Month", "8th Month", "9th Month (Winter Nights)", "10th Month", "11th Month", "12th Month", "Leap Month"
+        )
+        
+        for (i in 0 until 13) {
+            val label = TextView(this).apply {
+                text = monthLabels[i]
+                textSize = 14f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(0, 16, 0, 8)
+            }
+            layout.addView(label)
+            
+            val input = EditText(this).apply {
+                setText(if (i < currentNames.size) currentNames[i] else "")
+                hint = "Enter month name"
+                inputType = android.text.InputType.TYPE_CLASS_TEXT
+            }
+            monthInputs.add(input)
+            layout.addView(input)
+        }
+        
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Custom Month Names")
+            .setMessage("Enter names for each lunisolar month:")
+            .setView(scrollView)
+            .setPositiveButton("Save") { _, _ ->
+                val newNames = monthInputs.map { it.text.toString().trim() }
+                    .filter { it.isNotEmpty() }
+                
+                if (newNames.size >= 12) {
+                    val namesString = newNames.joinToString(",")
+                    config.lunisolarMonthNames = namesString
+                    LunisolarCalendar.setCustomMonthNames(newNames.toTypedArray())
+                    updateLunisolarMonthNamesText()
+                    updateWidgets()
+                } else {
+                    toast("Please enter at least 12 month names")
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun tryImportEvents() {
