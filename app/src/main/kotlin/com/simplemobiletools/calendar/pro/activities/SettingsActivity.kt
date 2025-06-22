@@ -1166,22 +1166,22 @@ class SettingsActivity : SimpleActivity() {
         updateLunisolarMonthNamesText()
         binding.settingsLunisolarMonthNamesHolder.setOnClickListener {
             val items = arrayListOf(
-                RadioItem(0, "Germanic Traditional"),
-                RadioItem(1, "Norse Traditional"),
-                RadioItem(2, "Anglo-Saxon"),
+                RadioItem(0, "Numerical"),
+                RadioItem(1, "Gregorian Names"),
+                RadioItem(2, "Misseri"),
                 RadioItem(3, "Custom...")
             )
 
             RadioGroupDialog(this, items, 0) { selectedOption ->
                 when (selectedOption) {
                     0 -> {
-                        config.lunisolarMonthNames = "Wulf Moon,Horn Moon,Lenting Moon,Eostre Moon,Thrimilce Moon,Æfte Liða,Ære Liða,Weod Moon,Haleg Moon,Winter Moon,Blot Moon,Ære Jól,Æfte Jól"
+                        config.lunisolarMonthNames = "1,2,3,4,5,6,7,8,9,10,11,12,13"
                     }
                     1 -> {
-                        config.lunisolarMonthNames = "Ylir,Mörsugur,Þorri,Góa,Einmánuður,Harpa,Skerpla,Solmánuður,Heyannir,Tvímánuður,Gormánuður,Frermánuður,Jólmánuður"
+                        config.lunisolarMonthNames = "January,February,March,April,May,June,July,August,September,October,November,December,Leap Month"
                     }
                     2 -> {
-                        config.lunisolarMonthNames = "Æfterra Géola,Solmónaþ,Hréþmónaþ,Éostermónaþ,Þrimilcemónaþ,Ærra Liþa,Æfterra Liþa,Weodmónaþ,Háligmónaþ,Winterfylleþ,Blótmónaþ,Ærra Géola,Æfterra Géola"
+                        config.lunisolarMonthNames = "Thorri,Goi,Einnmanudr,Sadtid,Eggtid,Solmanudr,Heyannir,Kornskurdarmanudr,Haustmanudr,Gormanudr,Frermanudr,Hrutmanudr,Hlaupmanudr"
                     }
                     3 -> {
                         // Custom input dialog
