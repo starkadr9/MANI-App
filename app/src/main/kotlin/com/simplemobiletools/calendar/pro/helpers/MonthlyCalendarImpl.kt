@@ -118,10 +118,14 @@ class MonthlyCalendarImpl(val callback: MonthlyCalendar, val context: Context) {
             val currentJD = firstDayJD - firstDayIndex + i
             val (gYear, gMonth, gDay) = LunisolarCalendar.julianDayToGregorian(currentJD)
             
-            // Determine if this day is in the current lunar month
+            // Convert each day to lunar date
             val dayLunar = LunisolarCalendar.gregorianToLunar(gYear, gMonth, gDay)
+            
+            // Determine if this day is in the current lunar month
             val isThisMonth = dayLunar.lunarYear == lunarYear && dayLunar.lunarMonth == lunarMonth
-            val dayValue = if (isThisMonth) dayLunar.lunarDay else gDay
+            
+            // Always use lunar day number (even for preview days from other months)
+            val dayValue = if (dayLunar.lunarDay > 0) dayLunar.lunarDay else gDay // Fallback to Gregorian if lunar conversion fails
             
             val gregorianDateTime = DateTime(gYear, gMonth, gDay, 0, 0)
             val isToday = isToday(gregorianDateTime, gDay)
