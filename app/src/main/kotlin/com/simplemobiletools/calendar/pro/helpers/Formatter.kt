@@ -120,11 +120,7 @@ object Formatter {
     }
 
     private fun getLunisolarMonthName(context: Context, monthNum: Int): String {
-        val monthNames = arrayOf(
-            "First Moon", "Second Moon", "Third Moon", "Fourth Moon", "Fifth Moon", "Sixth Moon",
-            "Seventh Moon", "Eighth Moon", "Ninth Moon", "Tenth Moon", "Eleventh Moon", "Twelfth Moon", "Thirteenth Moon"
-        )
-        return if (monthNum in 1..13) monthNames[monthNum - 1] else "Unknown Moon"
+        return LunisolarCalendar.getCustomMonthName(monthNum)
     }
 
     fun getHourPattern(context: Context) = if (context.config.use24HourFormat) PATTERN_HOURS_24 else PATTERN_HOURS_12

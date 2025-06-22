@@ -8,12 +8,18 @@ import kotlin.math.*
  */
 object LunisolarCalendar {
     // Constants from C code
-    private const val GERMANIC_EPOCH_BC = 750
+    private var germanicEpochBC = 750  // Configurable epoch
     private const val PI = 3.14159265358979323846
     private const val LUNAR_CYCLE_DAYS = 29.530588861
     private const val DAYS_PER_JULIAN_CENTURY = 36525.0
     private const val J2000_EPOCH = 2451545.0
     private const val YEARS_PER_METONIC_CYCLE = 19
+
+    // Configurable month names
+    private var customMonthNames = arrayOf(
+        "Wulf Moon", "Horn Moon", "Lenting Moon", "Eostre Moon", "Thrimilce Moon", "Æftera Litha",
+        "Weod Moon", "Hægest Moon", "Halig Moon", "Winter Moon", "Blot Moon", "Yule Moon", "Long Night Moon"
+    )
 
     // Moon phases
     enum class MoonPhase {
@@ -115,7 +121,7 @@ object LunisolarCalendar {
      * Calculate solstice/equinox Julian day
      * season: 0=winter solstice, 1=spring equinox, 2=summer solstice, 3=fall equinox
      */
-    private fun calculateSolsticeEquinoxJDE(year: Int, season: Int): Double {
+    fun calculateSolsticeEquinoxJDE(year: Int, season: Int): Double {
         val y = (year - 2000.0) / 1000.0
         
         return when(season) {
@@ -179,7 +185,7 @@ object LunisolarCalendar {
     /**
      * Find next moon phase after given Julian Day
      */
-    private fun findNextPhaseJD(startJD: Double, phaseType: Int): Double {
+    fun findNextPhaseJD(startJD: Double, phaseType: Int): Double {
         val kApprox = (startJD - 2451550.09766) / LUNAR_CYCLE_DAYS - phaseType / 4.0
         var k = floor(kApprox)
         val epsilon = 1e-5
@@ -245,7 +251,7 @@ object LunisolarCalendar {
     fun gregorianToLunar(year: Int, month: Int, day: Int): LunarDay {
         val weekday = calculateWeekday(year, month, day)
         val targetJD = gregorianToJulianDay(year, month, day, 12.0)
-        val eldYear = year + GERMANIC_EPOCH_BC
+        val eldYear = year + germanicEpochBC
         
         // Determine which lunar year this date falls in
         var lunarYearId = year
@@ -407,5 +413,76 @@ object LunisolarCalendar {
         }
         
         return results.toString()
+    }
+
+    // === CONFIGURATION FUNCTIONS ===
+    
+    /**
+     * Configuration functions for customizing the calendar
+     */
+    fun setCustomEpoch(epochBC: Int) {
+        germanicEpochBC = epochBC
+    }
+
+    fun setCustomMonthNames(monthNames: Array<String>) {
+        if (monthNames.size == 13) {
+            customMonthNames = monthNames
+        }
+    }
+
+    fun getCustomMonthName(monthNum: Int): String {
+        return if (monthNum in 1..13) customMonthNames[monthNum - 1] else "Unknown Moon"
+    }
+
+    fun getCustomMonthNames(): Array<String> = customMonthNames.copyOf()
+
+    fun getCurrentEpoch(): Int = germanicEpochBC
+
+    fun calculateEldYear(gregorianYear: Int): Int {
+        return gregorianYear + germanicEpochBC
+    }
+
+    /**
+     * Calculate moon phase for a specific date (simplified)
+     */
+    fun calculateMoonPhase(year: Int, month: Int, day: Int): MoonPhase {
+        try {
+            val currentJD = gregorianToJulianDay(year, month, day)
+            
+            // Find the last new moon before this date
+            val newMoonJD = findLastPhaseJD(currentJD, 0)
+            val daysSinceNewMoon = currentJD - newMoonJD
+            
+            // Approximate moon phase based on days since new moon
+            return when {
+                daysSinceNewMoon < 1 -> MoonPhase.NEW_MOON
+                daysSinceNewMoon < 6 -> MoonPhase.WAXING_CRESCENT
+                daysSinceNewMoon < 8 -> MoonPhase.FIRST_QUARTER
+                daysSinceNewMoon < 13 -> MoonPhase.WAXING_GIBBOUS
+                daysSinceNewMoon < 16 -> MoonPhase.FULL_MOON
+                daysSinceNewMoon < 21 -> MoonPhase.WANING_GIBBOUS
+                daysSinceNewMoon < 23 -> MoonPhase.LAST_QUARTER
+                daysSinceNewMoon < 29 -> MoonPhase.WANING_CRESCENT
+                else -> MoonPhase.NEW_MOON
+            }
+        } catch (e: Exception) {
+            return MoonPhase.NEW_MOON
+        }
+    }
+
+    /**
+     * Find last moon phase before given Julian Day
+     */
+    private fun findLastPhaseJD(targetJD: Double, phaseType: Int): Double {
+        val kApprox = (targetJD - 2451550.09766) / LUNAR_CYCLE_DAYS - phaseType / 4.0
+        var k = floor(kApprox)
+        
+        while (true) {
+            val jd = calculateTruePhaseJD(k + phaseType / 4.0, phaseType)
+            if (jd <= targetJD) {
+                return jd
+            }
+            k -= 1
+        }
     }
 } 

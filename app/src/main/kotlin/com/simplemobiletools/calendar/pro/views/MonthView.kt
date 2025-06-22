@@ -11,6 +11,8 @@ import com.simplemobiletools.calendar.pro.R
 import com.simplemobiletools.calendar.pro.extensions.*
 import com.simplemobiletools.calendar.pro.helpers.COLUMN_COUNT
 import com.simplemobiletools.calendar.pro.helpers.Formatter
+import com.simplemobiletools.calendar.pro.helpers.LunisolarCalendar
+import com.simplemobiletools.calendar.pro.helpers.LunisolarHolidays
 import com.simplemobiletools.calendar.pro.helpers.ROW_COUNT
 import com.simplemobiletools.calendar.pro.models.DayMonthly
 import com.simplemobiletools.calendar.pro.models.Event
@@ -203,6 +205,18 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
                     }
 
                     canvas.drawText(dayNumber, xPosCenter, yPos + textPaint.textSize, textPaint)
+                    
+                    // Draw moon phase icon for lunisolar calendar
+                    if (context.config.useLunisolarCalendar) {
+                        drawMoonPhaseIcon(canvas, day, xPosCenter, yPos + textPaint.textSize * 1.5f)
+                        
+                        // Draw solstice/equinox indicators
+                        drawAstronomicalEvent(canvas, day, xPosCenter, yPos + textPaint.textSize * 2.2f)
+                        
+                        // Draw holiday indicators
+                        drawHolidayIndicator(canvas, day, xPosCenter, yPos + textPaint.textSize * 2.8f)
+                    }
+                    
                     dayVerticalOffsets.put(day.indexOnMonthView, (verticalOffset + textPaint.textSize * 2).toInt())
                 }
                 curId++
@@ -455,5 +469,174 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
     fun updateCurrentlySelectedDay(x: Int, y: Int) {
         selectedDayCoords = Point(x, y)
         invalidate()
+    }
+
+    private fun drawMoonPhaseIcon(canvas: Canvas, day: DayMonthly, xCenter: Float, yPos: Float) {
+        try {
+            // Get Gregorian date components
+            val dayCode = day.code
+            val dateTime = Formatter.getDateTimeFromCode(dayCode)
+            
+            // Calculate moon phase for this day
+            val moonPhase = LunisolarCalendar.calculateMoonPhase(dateTime.year, dateTime.monthOfYear, dateTime.dayOfMonth)
+            
+            // Create moon phase paint
+            val moonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = if (day.isThisMonth) textColor else textColor.adjustAlpha(MEDIUM_ALPHA)
+                style = Paint.Style.FILL
+            }
+            
+            val moonStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = moonPaint.color
+                style = Paint.Style.STROKE
+                strokeWidth = 1f
+            }
+            
+            val radius = textPaint.textSize * 0.15f
+            
+            // Draw moon phase based on calculation
+            when (moonPhase) {
+                LunisolarCalendar.MoonPhase.NEW_MOON -> {
+                    // New moon - empty circle
+                    canvas.drawCircle(xCenter, yPos, radius, moonStrokePaint)
+                }
+                LunisolarCalendar.MoonPhase.FULL_MOON -> {
+                    // Full moon - filled circle
+                    canvas.drawCircle(xCenter, yPos, radius, moonPaint)
+                }
+                LunisolarCalendar.MoonPhase.FIRST_QUARTER -> {
+                    // First quarter - half filled (right side)
+                    canvas.drawCircle(xCenter, yPos, radius, moonStrokePaint)
+                    canvas.drawArc(xCenter - radius, yPos - radius, xCenter + radius, yPos + radius, 
+                                  -90f, 180f, true, moonPaint)
+                }
+                LunisolarCalendar.MoonPhase.LAST_QUARTER -> {
+                    // Last quarter - half filled (left side)
+                    canvas.drawCircle(xCenter, yPos, radius, moonStrokePaint)
+                    canvas.drawArc(xCenter - radius, yPos - radius, xCenter + radius, yPos + radius, 
+                                  90f, 180f, true, moonPaint)
+                }
+                LunisolarCalendar.MoonPhase.WAXING_CRESCENT -> {
+                    // Waxing crescent - small slice on right
+                    canvas.drawCircle(xCenter, yPos, radius, moonStrokePaint)
+                    canvas.drawArc(xCenter - radius, yPos - radius, xCenter + radius, yPos + radius, 
+                                  -45f, 90f, true, moonPaint)
+                }
+                LunisolarCalendar.MoonPhase.WANING_CRESCENT -> {
+                    // Waning crescent - small slice on left
+                    canvas.drawCircle(xCenter, yPos, radius, moonStrokePaint)
+                    canvas.drawArc(xCenter - radius, yPos - radius, xCenter + radius, yPos + radius, 
+                                  135f, 90f, true, moonPaint)
+                }
+                LunisolarCalendar.MoonPhase.WAXING_GIBBOUS -> {
+                    // Waxing gibbous - mostly full, missing left slice
+                    canvas.drawCircle(xCenter, yPos, radius, moonPaint)
+                    canvas.drawArc(xCenter - radius, yPos - radius, xCenter + radius, yPos + radius, 
+                                  90f, 90f, true, getColoredPaint(context.getProperBackgroundColor()))
+                }
+                LunisolarCalendar.MoonPhase.WANING_GIBBOUS -> {
+                    // Waning gibbous - mostly full, missing right slice
+                    canvas.drawCircle(xCenter, yPos, radius, moonPaint)
+                    canvas.drawArc(xCenter - radius, yPos - radius, xCenter + radius, yPos + radius, 
+                                  -90f, 90f, true, getColoredPaint(context.getProperBackgroundColor()))
+                }
+            }
+        } catch (e: Exception) {
+            // If moon phase calculation fails, don't draw anything
+        }
+    }
+
+    private fun drawAstronomicalEvent(canvas: Canvas, day: DayMonthly, xCenter: Float, yPos: Float) {
+        try {
+            val dayCode = day.code
+            val dateTime = Formatter.getDateTimeFromCode(dayCode)
+            
+            // Check if this date is a solstice or equinox
+            val astronomicalEvent = getAstronomicalEvent(dateTime.year, dateTime.monthOfYear, dateTime.dayOfMonth)
+            
+            if (astronomicalEvent != null) {
+                val eventPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = when (astronomicalEvent) {
+                        "WS" -> 0xFF4CAF50.toInt() // Winter Solstice - Green
+                        "SS" -> 0xFFFF9800.toInt() // Summer Solstice - Orange  
+                        "SE" -> 0xFF9C27B0.toInt() // Spring Equinox - Purple
+                        "FE" -> 0xFF795548.toInt() // Fall Equinox - Brown
+                        else -> primaryColor
+                    }
+                    style = Paint.Style.FILL
+                    textSize = textPaint.textSize * 0.4f
+                    textAlign = Paint.Align.CENTER
+                }
+                
+                // Draw small colored dot with text
+                val radius = textPaint.textSize * 0.08f
+                canvas.drawCircle(xCenter, yPos, radius, eventPaint)
+                
+                // Draw abbreviation below
+                canvas.drawText(astronomicalEvent, xCenter, yPos + radius + eventPaint.textSize, eventPaint)
+            }
+        } catch (e: Exception) {
+            // If calculation fails, don't draw anything
+        }
+    }
+    
+    private fun getAstronomicalEvent(year: Int, month: Int, day: Int): String? {
+        try {
+            // Calculate solstices and equinoxes for this year
+            val winterSolstice = LunisolarCalendar.calculateSolsticeEquinoxJDE(year, 0)
+            val springEquinox = LunisolarCalendar.calculateSolsticeEquinoxJDE(year, 1)  
+            val summerSolstice = LunisolarCalendar.calculateSolsticeEquinoxJDE(year, 2)
+            val fallEquinox = LunisolarCalendar.calculateSolsticeEquinoxJDE(year, 3)
+            
+            val currentJD = LunisolarCalendar.gregorianToJulianDay(year, month, day)
+            
+            // Check if current date matches any astronomical event (within 1 day tolerance)
+            return when {
+                kotlin.math.abs(currentJD - winterSolstice) < 0.5 -> "WS"
+                kotlin.math.abs(currentJD - springEquinox) < 0.5 -> "SE"
+                kotlin.math.abs(currentJD - summerSolstice) < 0.5 -> "SS"
+                kotlin.math.abs(currentJD - fallEquinox) < 0.5 -> "FE"
+                else -> null
+            }
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    private fun drawHolidayIndicator(canvas: Canvas, day: DayMonthly, xCenter: Float, yPos: Float) {
+        try {
+            val dayCode = day.code
+            val dateTime = Formatter.getDateTimeFromCode(dayCode)
+            
+            // Check if this date is a holiday
+            val holiday = LunisolarHolidays.getHolidayForDate(dateTime.year, dateTime.monthOfYear, dateTime.dayOfMonth)
+            
+            if (holiday != null) {
+                val holidayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = holiday.color
+                    style = Paint.Style.FILL
+                    textSize = textPaint.textSize * 0.3f
+                    textAlign = Paint.Align.CENTER
+                }
+                
+                // Draw small star/diamond shape for holidays
+                val size = textPaint.textSize * 0.1f
+                val path = android.graphics.Path().apply {
+                    moveTo(xCenter, yPos - size)           // Top point
+                    lineTo(xCenter + size * 0.6f, yPos)    // Right point
+                    lineTo(xCenter, yPos + size)           // Bottom point  
+                    lineTo(xCenter - size * 0.6f, yPos)    // Left point
+                    close()
+                }
+                
+                canvas.drawPath(path, holidayPaint)
+                
+                // Draw holiday abbreviation below (first 2 chars)
+                val abbreviation = holiday.name.take(2).uppercase()
+                canvas.drawText(abbreviation, xCenter, yPos + size + holidayPaint.textSize, holidayPaint)
+            }
+        } catch (e: Exception) {
+            // If calculation fails, don't draw anything
+        }
     }
 }
