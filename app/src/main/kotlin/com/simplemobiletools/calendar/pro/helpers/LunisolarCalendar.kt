@@ -222,7 +222,7 @@ object LunisolarCalendar {
         val yearStartJD = calculateLunarNewYearJD(lunarYearIdentifier)
         val nextYearStartJD = calculateLunarNewYearJD(lunarYearIdentifier + 1)
         
-        var fullMoonCount = 0
+        var fullMoonCount = 1 // Start with 1 since yearStartJD is already the first full moon
         var currentFMJD = yearStartJD
         val epsilon = 1e-5
         
@@ -235,7 +235,7 @@ object LunisolarCalendar {
             }
         }
         
-        return fullMoonCount + 1
+        return fullMoonCount // No +1 needed since we started counting from 1
     }
 
     /**

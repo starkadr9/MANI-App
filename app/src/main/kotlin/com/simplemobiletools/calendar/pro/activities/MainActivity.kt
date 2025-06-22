@@ -23,6 +23,7 @@ import com.simplemobiletools.calendar.pro.dialogs.SelectEventTypesDialog
 import com.simplemobiletools.calendar.pro.dialogs.SetRemindersDialog
 import com.simplemobiletools.calendar.pro.extensions.*
 import com.simplemobiletools.calendar.pro.fragments.*
+import com.simplemobiletools.calendar.pro.fragments.LunisolarMonthFragment
 import com.simplemobiletools.calendar.pro.helpers.*
 import com.simplemobiletools.calendar.pro.helpers.Formatter
 import com.simplemobiletools.calendar.pro.helpers.IcsImporter.ImportResult
@@ -1028,7 +1029,14 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
     private fun getFragmentsHolder() = when (config.storedView) {
         DAILY_VIEW -> DayFragmentsHolder()
-        MONTHLY_VIEW -> MonthFragmentsHolder()
+        MONTHLY_VIEW -> {
+            if (config.useLunisolarCalendar) {
+                // Use our custom lunisolar fragment
+                LunisolarMonthFragment()
+            } else {
+                MonthFragmentsHolder()
+            }
+        }
         MONTHLY_DAILY_VIEW -> MonthDayFragmentsHolder()
         YEARLY_VIEW -> YearFragmentsHolder()
         EVENTS_LIST_VIEW -> EventListFragment()
