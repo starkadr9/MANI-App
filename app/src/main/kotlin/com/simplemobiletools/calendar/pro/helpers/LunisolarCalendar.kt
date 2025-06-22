@@ -491,4 +491,27 @@ object LunisolarCalendar {
             k -= 1
         }
     }
+
+    /**
+     * Debug function to test lunar to gregorian conversion
+     */
+    fun debugLunarToGregorian(lunarYear: Int, lunarMonth: Int): String {
+        val result = StringBuilder()
+        result.append("=== DEBUG LUNAR TO GREGORIAN ===\n")
+        result.append("Testing Lunar Year $lunarYear, Month $lunarMonth\n\n")
+        
+        val monthLength = getLunarMonthLength(lunarYear, lunarMonth)
+        result.append("Month length: $monthLength days\n\n")
+        
+        for (day in 1..minOf(monthLength, 10)) { // Test first 10 days
+            val gregorian = lunarToGregorian(lunarYear, lunarMonth, day)
+            if (gregorian != null) {
+                result.append("Lunar $lunarYear/$lunarMonth/$day → Gregorian ${gregorian.first}-${gregorian.second}-${gregorian.third}\n")
+            } else {
+                result.append("Lunar $lunarYear/$lunarMonth/$day → INVALID\n")
+            }
+        }
+        
+        return result.toString()
+    }
 } 

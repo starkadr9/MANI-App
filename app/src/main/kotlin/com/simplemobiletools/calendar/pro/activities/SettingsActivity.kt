@@ -1217,42 +1217,58 @@ class SettingsActivity : SimpleActivity() {
             currentNames.add("Month ${currentNames.size + 1}")
         }
         
-        val scrollView = ScrollView(this)
+        val scrollView = ScrollView(this).apply {
+            // Set maximum height to ensure buttons are visible - smaller height
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                resources.displayMetrics.heightPixels / 2 // Max 1/2 of screen height
+            )
+        }
+        
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(32, 16, 32, 16)
+            setPadding(16, 8, 16, 8) // Reduced padding
         }
         scrollView.addView(layout)
         
         val monthInputs = mutableListOf<EditText>()
         val monthLabels = listOf(
-            "1st Month (Yule)", "2nd Month", "3rd Month (Sumarmal)", "4th Month", "5th Month", "6th Month (Midsummer)",
-            "7th Month", "8th Month", "9th Month (Winter Nights)", "10th Month", "11th Month", "12th Month", "Leap Month"
+            "1st (Yule)", "2nd", "3rd (Sumarmal)", "4th", "5th", "6th (Midsummer)",
+            "7th", "8th", "9th (Winter Nights)", "10th", "11th", "12th", "13th (Leap)"
         )
         
         for (i in 0 until 13) {
+            // Compact label
             val label = TextView(this).apply {
                 text = monthLabels[i]
-                textSize = 14f
+                textSize = 12f // Smaller text
                 setTypeface(null, android.graphics.Typeface.BOLD)
-                setPadding(0, 16, 0, 8)
+                setPadding(0, 4, 0, 2) // Reduced padding
             }
             layout.addView(label)
             
             val input = EditText(this).apply {
                 setText(if (i < currentNames.size) currentNames[i] else "")
-                hint = "Enter month name"
+                hint = "Month name"
                 inputType = android.text.InputType.TYPE_CLASS_TEXT
+                textSize = 12f // Smaller text
+                // Compact layout
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = 4 // Reduced margin
+                }
+                setPadding(8, 4, 8, 4) // Reduced padding
             }
             monthInputs.add(input)
             layout.addView(input)
         }
         
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Custom Month Names")
-            .setMessage("Enter names for each lunisolar month:")
-            .setView(scrollView)
-            .setPositiveButton("Save") { _, _ ->
+            .setView(scrollView) // Removed message to save space
+            .setPositiveButton("SAVE") { _, _ ->
                 val newNames = monthInputs.map { it.text.toString().trim() }
                     .filter { it.isNotEmpty() }
                 
@@ -1262,14 +1278,24 @@ class SettingsActivity : SimpleActivity() {
                     LunisolarCalendar.setCustomMonthNames(newNames.toTypedArray())
                     updateLunisolarMonthNamesText()
                     updateWidgets()
-                    toast("Month names saved successfully!")
+                    toast("Month names saved!")
                 } else {
                     toast("Please enter at least 12 month names")
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("CANCEL", null)
             .setCancelable(true)
-            .show()
+            .create()
+        
+        // Force dialog to be properly sized and ensure buttons are visible
+        dialog.show()
+        
+        // Set explicit size constraints
+        val window = dialog.window
+        window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.85).toInt(), // Slightly smaller width
+            (resources.displayMetrics.heightPixels * 0.7).toInt()  // Max 70% height
+        )
     }
 
     private fun setupUseEldYears() = binding.apply {
@@ -1278,6 +1304,8 @@ class SettingsActivity : SimpleActivity() {
             settingsUseEldYears.toggle()
             config.useEldYears = settingsUseEldYears.isChecked
             updateWidgets()
+            // Force refresh of any active fragments
+            recreate()
         }
     }
 

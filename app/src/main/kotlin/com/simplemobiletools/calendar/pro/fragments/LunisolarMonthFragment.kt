@@ -15,6 +15,7 @@ import com.simplemobiletools.calendar.pro.helpers.Config
 import com.simplemobiletools.calendar.pro.helpers.Formatter
 import com.simplemobiletools.calendar.pro.helpers.LunisolarCalendar
 import com.simplemobiletools.calendar.pro.helpers.MONTHLY_VIEW
+import com.simplemobiletools.calendar.pro.extensions.eventsHelper
 import com.simplemobiletools.commons.extensions.applyColorFilter
 import com.simplemobiletools.commons.extensions.getProperPrimaryColor
 import com.simplemobiletools.commons.extensions.getProperTextColor
@@ -56,12 +57,20 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         prevButton.setOnClickListener { navigateToPreviousMonth() }
         nextButton.setOnClickListener { navigateToNextMonth() }
         todayButton.setOnClickListener { goToToday() }
-        monthTitle.setOnClickListener { 
-            (activity as? MainActivity)?.showGoToDateDialog()
+        monthTitle.setOnClickListener {
+            // Debug: Log lunar to gregorian conversion for this month
+            val debug = LunisolarCalendar.debugLunarToGregorian(currentLunarYear, currentLunarMonth)
+            android.util.Log.d("LunisolarDebug", debug)
         }
         
         updateDisplay()
         return view
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Refresh display in case settings changed
+        updateDisplay()
     }
     
     // Required by MyFragmentHolder
@@ -305,6 +314,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             }
             
             // Add solstice/equinox highlighting (only if not today and not a holiday)
+            var isSolsticeEquinox = false
             if (gregorianDate != null && !isToday && !(lunarDay <= 3 && listOf(1, 3, 6, 9).contains(currentLunarMonth))) {
                 val (year, month, day) = gregorianDate
                 val jd = LunisolarCalendar.gregorianToJulianDay(year, month, day)
@@ -318,22 +328,46 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                         dayView.setBackgroundColor(0xFF4CAF50.toInt()) // Green for winter solstice
                         dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nWS" else "${lunarDay}\nWS"
                         dayView.setTextColor(0xFFFFFFFF.toInt())
+                        isSolsticeEquinox = true
                     }
                     kotlin.math.abs(jd - springEquinoxJD) < 0.5 -> {
                         dayView.setBackgroundColor(0xFF9C27B0.toInt()) // Purple for spring equinox
                         dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nSE" else "${lunarDay}\nSE"
                         dayView.setTextColor(0xFFFFFFFF.toInt())
+                        isSolsticeEquinox = true
                     }
                     kotlin.math.abs(jd - summerSolsticeJD) < 0.5 -> {
                         dayView.setBackgroundColor(0xFFFF9800.toInt()) // Orange for summer solstice
                         dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nSS" else "${lunarDay}\nSS"
                         dayView.setTextColor(0xFFFFFFFF.toInt())
+                        isSolsticeEquinox = true
                     }
                     kotlin.math.abs(jd - fallEquinoxJD) < 0.5 -> {
                         dayView.setBackgroundColor(0xFF795548.toInt()) // Brown for fall equinox
                         dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nFE" else "${lunarDay}\nFE"
                         dayView.setTextColor(0xFFFFFFFF.toInt())
+                        isSolsticeEquinox = true
                     }
+                }
+            }
+            
+            // Check for events on this day
+            var hasEvents = false
+            if (gregorianDate != null) {
+                val (year, month, day) = gregorianDate
+                // Create start and end timestamps for the day
+                val dayStart = DateTime(year, month, day, 0, 0, 0).millis / 1000
+                val dayEnd = DateTime(year, month, day, 23, 59, 59).millis / 1000
+                
+                // Check for events using EventsHelper asynchronously
+                try {
+                    // Use a simple asynchronous check by querying the database directly
+                    val eventsHelper = requireContext().eventsHelper
+                    eventsHelper.getEvents(dayStart, dayEnd, applyTypeFilter = true) { events ->
+                        hasEvents = events.isNotEmpty()
+                    }
+                } catch (e: Exception) {
+                    // Ignore errors
                 }
             }
             
@@ -342,32 +376,49 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 val gregorianDate = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, lunarDay)
                 if (gregorianDate != null) {
                     val (year, month, day) = gregorianDate
-                    // Switch to daily view for the selected day
+                    // Debug logging
+                    android.util.Log.d("LunisolarClick", "Clicked lunar day $lunarDay in month $currentLunarMonth year $currentLunarYear")
+                    android.util.Log.d("LunisolarClick", "Converted to Gregorian: $year-$month-$day")
+                    
+                    // Let's also check what the month start should be
+                    val monthStart = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, 1)
+                    if (monthStart != null) {
+                        android.util.Log.d("LunisolarClick", "Month $currentLunarMonth day 1 should be: ${monthStart.first}-${monthStart.second}-${monthStart.third}")
+                    }
+                    
+                    // Switch to daily view for the selected day using the correct function
                     val mainActivity = activity as? MainActivity
                     mainActivity?.let { mainActivity ->
                         val dateTime = DateTime(year, month, day, 0, 0)
-                        mainActivity.openDayFromMonthly(dateTime)
+                        val timestamp = dateTime.millis
+                        android.util.Log.d("LunisolarClick", "Opening day with timestamp: $timestamp")
+                        mainActivity.openDayAt(timestamp)
                     }
                 }
             }
             
-            // Add border using theme colors
-            val bgColor = when {
-                isToday -> requireContext().getProperPrimaryColor()
-                lunarDay <= 3 && currentLunarMonth == 1 -> 0xFF4CAF50.toInt()
-                lunarDay <= 3 && currentLunarMonth == 3 -> 0xFFFF9800.toInt()
-                lunarDay <= 3 && currentLunarMonth == 6 -> 0xFFFFEB3B.toInt()
-                lunarDay <= 3 && currentLunarMonth == 9 -> 0xFF2196F3.toInt()
-                lunarDay == 1 -> 0xFFE3F2FD.toInt()
-                else -> backgroundColor and 0x10FFFFFF.toInt()
+            // Add event dot indicator if this day has events (after all other formatting)
+            if (hasEvents) {
+                // Add dot to the text, regardless of what type of day it is
+                val currentText = dayView.text.toString()
+                if (!currentText.contains("•")) {
+                    dayView.text = "$currentText •"
+                }
             }
             
-            dayView.background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(bgColor)
-                setStroke(1, textColor and 0x40FFFFFF.toInt()) // Semi-transparent border
+            // Add border using theme colors (only if not a special day)
+            if (!isSolsticeEquinox && !isToday && !(lunarDay <= 3 && listOf(1, 3, 6, 9).contains(currentLunarMonth))) {
+                val bgColor = if (lunarDay == 1) 0xFFE3F2FD.toInt() else backgroundColor and 0x10FFFFFF.toInt()
+                
+                dayView.background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(bgColor)
+                    setStroke(1, textColor and 0x40FFFFFF.toInt()) // Semi-transparent border
+                }
             }
         }
         
         return dayView
     }
+    
+
 } 

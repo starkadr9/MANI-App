@@ -1273,7 +1273,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         refreshViewPager()
     }
 
-    private fun openDayAt(timestamp: Long) {
+    fun openDayAt(timestamp: Long) {
         val dayCode = Formatter.getDayCodeFromTS(timestamp / 1000L)
         binding.calendarFab.beVisible()
         config.storedView = DAILY_VIEW
