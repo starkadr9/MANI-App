@@ -300,8 +300,7 @@ class Config(context: Context) : BaseConfig(context) {
         set(lunisolarMonthNames) = prefs.edit().putString(LUNISOLAR_MONTH_NAMES, lunisolarMonthNames).apply()
 
     init {
-        useLunisolarCalendar = true
-        // Apply settings to LunisolarCalendar
+        // Apply settings to LunisolarCalendar when config is loaded
         LunisolarCalendar.setCustomEpoch(lunisolarEpoch)
         LunisolarCalendar.setCustomMonthNames(lunisolarMonthNames.split(",").toTypedArray())
     }
