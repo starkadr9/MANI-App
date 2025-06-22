@@ -1,6 +1,7 @@
 package com.simplemobiletools.calendar.pro.helpers
 
 import android.content.Context
+import com.simplemobiletools.calendar.pro.extensions.config
 import com.simplemobiletools.calendar.pro.extensions.eventsHelper
 import com.simplemobiletools.calendar.pro.extensions.getProperDayIndexInWeek
 import com.simplemobiletools.calendar.pro.extensions.isWeekendIndex

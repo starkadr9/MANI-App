@@ -159,6 +159,10 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         addImportIdsToTasks {
             refreshViewPager()
         }
+
+        // TODO: Add proper settings toggle for lunisolar calendar
+        // For now, lunisolar mode is disabled by default
+        // config.useLunisolarCalendar = true
     }
 
     override fun onResume() {
@@ -1368,6 +1372,22 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             add(Release(155, R.string.release_155))
             add(Release(167, R.string.release_167))
             checkWhatsNew(this, BuildConfig.VERSION_CODE)
+        }
+    }
+
+    // TEMPORARY: Test function for lunisolar calculations
+    private fun testLunisolarCalculations() {
+        ensureBackgroundThread {
+            val testResults = LunisolarCalendar.runBasicTests()
+            runOnUiThread {
+                android.util.Log.d("LUNISOLAR_TEST", testResults)
+                // Also show in a dialog for easy viewing
+                android.app.AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Lunisolar Calendar Test Results")
+                    .setMessage(testResults)
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
         }
     }
 }

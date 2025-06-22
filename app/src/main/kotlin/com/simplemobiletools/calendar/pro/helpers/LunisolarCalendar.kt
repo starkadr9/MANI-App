@@ -344,4 +344,68 @@ object LunisolarCalendar {
         val nextMonthStartJD = findNextPhaseJD(monthStartJD, 2)
         return floor(nextMonthStartJD - monthStartJD + 0.5).toInt()
     }
+
+    // === TEST FUNCTIONS ===
+    
+    /**
+     * Test function to verify lunisolar calculations
+     */
+    fun runBasicTests(): String {
+        val results = StringBuilder()
+        
+        // Test 1: Current date conversion
+        results.append("=== BASIC CONVERSION TESTS ===\n")
+        val testDates = listOf(
+            Triple(2024, 12, 15),
+            Triple(2024, 1, 1),
+            Triple(2024, 6, 21), // Summer solstice
+            Triple(2024, 12, 21)  // Winter solstice
+        )
+        
+        testDates.forEach { (year, month, day) ->
+            val lunar = gregorianToLunar(year, month, day)
+            results.append("$year-$month-$day → Lunar: ${lunar.lunarYear}/${lunar.lunarMonth}/${lunar.lunarDay}\n")
+        }
+        
+        // Test 2: New Year calculations
+        results.append("\n=== NEW YEAR TESTS ===\n")
+        for (year in 2024..2026) {
+            val newYearJD = calculateLunarNewYearJD(year)
+            val (gYear, gMonth, gDay) = julianDayToGregorian(newYearJD)
+            val monthsInYear = getLunarMonthsInYear(year)
+            val isLeap = isLunarLeapYear(year)
+            results.append("Lunar $year starts: $gYear-$gMonth-$gDay, $monthsInYear months${if (isLeap) " (LEAP)" else ""}\n")
+        }
+        
+        // Test 3: Month lengths
+        results.append("\n=== MONTH LENGTH TESTS ===\n")
+        val testYear = 2024
+        val monthsInTestYear = getLunarMonthsInYear(testYear)
+        for (month in 1..monthsInTestYear) {
+            val length = getLunarMonthLength(testYear, month)
+            results.append("Lunar $testYear/$month: $length days\n")
+        }
+        
+        // Test 4: Round-trip conversion
+        results.append("\n=== ROUND-TRIP TESTS ===\n")
+        val testLunarDates = listOf(
+            Triple(2024, 1, 1),
+            Triple(2024, 1, 15),
+            Triple(2024, 6, 1),
+            Triple(2024, 12, 1)
+        )
+        
+        testLunarDates.forEach { (lunarYear, lunarMonth, lunarDay) ->
+            val gregorian = lunarToGregorian(lunarYear, lunarMonth, lunarDay)
+            if (gregorian != null) {
+                val backToLunar = gregorianToLunar(gregorian.first, gregorian.second, gregorian.third)
+                val success = backToLunar.lunarYear == lunarYear && 
+                            backToLunar.lunarMonth == lunarMonth && 
+                            backToLunar.lunarDay == lunarDay
+                results.append("Lunar $lunarYear/$lunarMonth/$lunarDay ↔ Gregorian ${gregorian.first}-${gregorian.second}-${gregorian.third} ${if (success) "✓" else "✗"}\n")
+            }
+        }
+        
+        return results.toString()
+    }
 } 
