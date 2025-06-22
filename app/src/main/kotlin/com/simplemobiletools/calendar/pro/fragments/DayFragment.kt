@@ -72,7 +72,19 @@ class DayFragment : Fragment() {
 
         val day = Formatter.getDayTitle(requireContext(), mDayCode)
         topNavigationBinding.topValue.apply {
-            text = day
+            text = if (requireContext().config.useLunisolarCalendar) {
+                val gregorianTitle = day
+                val dateTime = Formatter.getDateTimeFromCode(mDayCode)
+                val lunarDate = LunisolarCalendar.gregorianToLunar(dateTime.year, dateTime.monthOfYear, dateTime.dayOfMonth)
+                if (lunarDate.lunarDay != 0) {
+                    val monthName = Formatter.getLunisolarMonthName(requireContext(), lunarDate.lunarMonth)
+                    "$gregorianTitle\n${lunarDate.lunarDay} $monthName ${lunarDate.lunarYear}"
+                } else {
+                    gregorianTitle
+                }
+            } else {
+                day
+            }
             contentDescription = text
             setOnClickListener {
                 (activity as MainActivity).showGoToDateDialog()

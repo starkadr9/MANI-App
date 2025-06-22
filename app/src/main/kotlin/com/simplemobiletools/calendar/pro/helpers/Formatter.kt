@@ -119,10 +119,13 @@ object Formatter {
         context.resources.getStringArray(com.simplemobiletools.commons.R.array.months_short)[id - 1]
     }
 
-    private fun getLunisolarMonthName(context: Context, monthNum: Int): String {
+    /**
+     * Get lunisolar month name based on configuration
+     */
+    fun getLunisolarMonthName(context: Context, lunarMonth: Int): String {
         val monthNamesString = context.config.lunisolarMonthNames
         val monthNames = monthNamesString.split(",")
-        return if (monthNum in 1..monthNames.size) monthNames[monthNum - 1] else "Unknown Moon"
+        return if (lunarMonth in 1..monthNames.size) monthNames[lunarMonth - 1] else "Unknown Moon"
     }
 
     fun getHourPattern(context: Context) = if (context.config.use24HourFormat) PATTERN_HOURS_24 else PATTERN_HOURS_12

@@ -16,6 +16,7 @@ import com.simplemobiletools.calendar.pro.helpers.Formatter
 import com.simplemobiletools.calendar.pro.helpers.LunisolarCalendar
 import com.simplemobiletools.calendar.pro.helpers.MONTHLY_VIEW
 import com.simplemobiletools.calendar.pro.extensions.eventsHelper
+import com.simplemobiletools.calendar.pro.extensions.eventsDB
 import com.simplemobiletools.commons.extensions.applyColorFilter
 import com.simplemobiletools.commons.extensions.getProperPrimaryColor
 import com.simplemobiletools.commons.extensions.getProperTextColor
@@ -359,13 +360,11 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 val dayStart = DateTime(year, month, day, 0, 0, 0).millis / 1000
                 val dayEnd = DateTime(year, month, day, 23, 59, 59).millis / 1000
                 
-                // Check for events using EventsHelper asynchronously
+                // Check for events using direct database query (synchronous)
                 try {
-                    // Use a simple asynchronous check by querying the database directly
-                    val eventsHelper = requireContext().eventsHelper
-                    eventsHelper.getEvents(dayStart, dayEnd, applyTypeFilter = true) { events ->
-                        hasEvents = events.isNotEmpty()
-                    }
+                    val eventsDB = requireContext().eventsDB
+                    val events = eventsDB.getOneTimeEventsOrTasksFromTo(dayStart, dayEnd)
+                    hasEvents = events.isNotEmpty()
                 } catch (e: Exception) {
                     // Ignore errors
                 }
