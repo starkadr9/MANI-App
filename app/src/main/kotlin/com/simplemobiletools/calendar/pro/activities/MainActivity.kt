@@ -1,6 +1,8 @@
 package com.simplemobiletools.calendar.pro.activities
 
 import android.annotation.SuppressLint
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.graphics.drawable.ColorDrawable
@@ -11,8 +13,14 @@ import android.os.Handler
 import android.provider.ContactsContract.CommonDataKinds
 import android.provider.ContactsContract.Contacts
 import android.provider.ContactsContract.Data
+import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 import com.simplemobiletools.calendar.pro.BuildConfig
 import com.simplemobiletools.calendar.pro.R
 import com.simplemobiletools.calendar.pro.adapters.EventListAdapter
@@ -53,8 +61,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     private var showCalDAVRefreshToast = false
     private var mShouldFilterBeVisible = false
     private var mLatestSearchQuery = ""
-    private var shouldGoToTodayBeVisible = false
-    private var goToTodayButton: MenuItem? = null
     private var currentFragments = ArrayList<MyFragmentHolder>()
 
     private var mStoredTextColor = 0
@@ -158,9 +164,8 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             refreshViewPager()
         }
 
-        // TODO: Add proper settings toggle for lunisolar calendar
-        // For now, lunisolar mode is disabled by default
-        // config.useLunisolarCalendar = true
+        // Setup Navigation Drawer
+        setupNavigationDrawer()
     }
 
     override fun onResume() {
@@ -234,11 +239,8 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             hideExtendedFab()
         }
 
-        shouldGoToTodayBeVisible = currentFragments.lastOrNull()?.shouldGoToTodayBeVisible() ?: false
         binding.mainMenu.getToolbar().menu.apply {
-            goToTodayButton = findItem(R.id.go_to_today)
             findItem(R.id.filter).isVisible = mShouldFilterBeVisible
-            findItem(R.id.go_to_today).isVisible = shouldGoToTodayBeVisible && !binding.mainMenu.isSearchOpen
             findItem(R.id.refresh_caldav_calendars).isVisible = config.caldavSync
         }
     }
@@ -253,17 +255,15 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         }
 
         mainMenu.getToolbar().setOnMenuItemClickListener { menuItem ->
-            if (fabExtendedOverlay.isVisible()) {
+            if (binding.fabExtendedOverlay.isVisible()) {
                 hideExtendedFab()
             }
 
             when (menuItem.itemId) {
                 R.id.change_view -> showViewDialog()
-                R.id.go_to_today -> goToToday()
                 R.id.filter -> showFilterDialog()
                 R.id.refresh_caldav_calendars -> refreshCalDAVCalendars(true)
                 R.id.settings -> launchSettings()
-                R.id.about -> launchAbout()
                 else -> return@setOnMenuItemClickListener false
             }
             return@setOnMenuItemClickListener true
@@ -271,7 +271,9 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     }
 
     override fun onBackPressed() {
-        if (binding.mainMenu.isSearchOpen) {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        } else if (binding.mainMenu.isSearchOpen) {
             closeSearch()
         } else {
             binding.swipeRefreshLayout.isRefreshing = false
@@ -485,13 +487,8 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             resetActionBarTitle()
             closeSearch()
             updateView(it as Int)
-            shouldGoToTodayBeVisible = false
             refreshMenuItems()
         }
-    }
-
-    private fun goToToday() {
-        currentFragments.last().goToToday()
     }
 
     fun showGoToDateDialog() {
@@ -518,10 +515,8 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     }
 
     fun toggleGoToTodayVisibility(beVisible: Boolean) {
-        shouldGoToTodayBeVisible = beVisible
-        if (goToTodayButton?.isVisible != beVisible) {
-            refreshMenuItems()
-        }
+        // Stub method for compatibility - go to today button has been removed
+        // This method is called by fragments but we no longer use it
     }
 
     private fun updateCalDAVEvents() {
@@ -561,10 +556,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         config.storedView = view
         checkSwipeRefreshAvailability()
         updateViewPager(dateCode)
-        if (goToTodayButton?.isVisible == true) {
-            shouldGoToTodayBeVisible = false
-            refreshMenuItems()
-        }
     }
 
     private fun getDateCodeToDisplay(newView: Int): String? {
@@ -721,7 +712,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     private fun removeTopFragment() {
         supportFragmentManager.beginTransaction().remove(currentFragments.last()).commit()
         currentFragments.removeAt(currentFragments.size - 1)
-        toggleGoToTodayVisibility(currentFragments.last().shouldGoToTodayBeVisible())
         currentFragments.last().apply {
             refreshEvents()
         }
@@ -752,29 +742,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     private fun launchSettings() {
         hideKeyboard()
         startActivity(Intent(applicationContext, SettingsActivity::class.java))
-    }
-
-    private fun launchAbout() {
-        val licenses = LICENSE_JODA
-
-        val faqItems = arrayListOf(
-            FAQItem("${getString(R.string.faq_2_title)} ${getString(R.string.faq_2_title_extra)}", R.string.faq_2_text),
-            FAQItem(R.string.faq_5_title, R.string.faq_5_text),
-            FAQItem(R.string.faq_3_title, R.string.faq_3_text),
-            FAQItem(R.string.faq_6_title, R.string.faq_6_text),
-            FAQItem(R.string.faq_1_title, R.string.faq_1_text),
-            FAQItem(com.simplemobiletools.commons.R.string.faq_1_title_commons, com.simplemobiletools.commons.R.string.faq_1_text_commons),
-            FAQItem(com.simplemobiletools.commons.R.string.faq_4_title_commons, com.simplemobiletools.commons.R.string.faq_4_text_commons),
-            FAQItem(R.string.faq_4_title, R.string.faq_4_text)
-        )
-
-        if (!resources.getBoolean(com.simplemobiletools.commons.R.bool.hide_google_relations)) {
-            faqItems.add(FAQItem(com.simplemobiletools.commons.R.string.faq_2_title_commons, com.simplemobiletools.commons.R.string.faq_2_text_commons))
-            faqItems.add(FAQItem(com.simplemobiletools.commons.R.string.faq_6_title_commons, com.simplemobiletools.commons.R.string.faq_6_text_commons))
-            faqItems.add(FAQItem(com.simplemobiletools.commons.R.string.faq_7_title_commons, com.simplemobiletools.commons.R.string.faq_7_text_commons))
-        }
-
-        startAboutActivity(R.string.app_name, licenses, BuildConfig.VERSION_NAME, faqItems, true)
     }
 
     private fun searchQueryChanged(text: String) {
@@ -1033,5 +1000,21 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         }
 
         return items
+    }
+
+    private fun setupNavigationDrawer() {
+        val toggle = ActionBarDrawerToggle(
+            this, binding.drawerLayout, binding.mainMenu.getToolbar(),
+            R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        binding.drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        // Navigation drawer is currently empty - placeholder for future functionality
+        binding.navView.setNavigationItemSelectedListener { menuItem ->
+            // Handle future menu items here
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+            true
+        }
     }
 }

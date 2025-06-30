@@ -208,9 +208,9 @@ class MonthView(context: Context, attrs: AttributeSet, defStyle: Int) : View(con
                         val holiday = LunisolarHolidays.getHolidayForDate(dateTime)
                         if (holiday != null) {
                             val holidayColor = when (holiday.name) {
-                                "Yule" -> 0x334CAF50.toInt()           // Green background
-                                "Sumarmal" -> 0x33FF9800.toInt()      // Orange background  
-                                "Midsummer" -> 0x33FFEB3B.toInt()     // Yellow background
+                                "Yule" -> 0x33D32F2F.toInt()           // Red background
+                                "Sumarmal" -> 0x334CAF50.toInt()      // Green background  
+                                "Midsummer" -> 0x33F57F17.toInt()     // Darker yellow background
                                 "Winter Nights" -> 0x333F51B5.toInt() // Blue background
                                 else -> 0x33E91E63.toInt()            // Pink background
                             }

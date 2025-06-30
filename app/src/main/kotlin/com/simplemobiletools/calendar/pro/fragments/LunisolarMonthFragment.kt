@@ -6,13 +6,16 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import kotlin.math.abs
 import com.simplemobiletools.calendar.pro.R
 import com.simplemobiletools.calendar.pro.activities.MainActivity
 import com.simplemobiletools.calendar.pro.helpers.Config
@@ -46,6 +49,9 @@ class LunisolarMonthFragment : MyFragmentHolder() {
     private var dayEvents = HashMap<String, ArrayList<Event>>()
     private var eventsLoaded = false
     
+    // Gesture detection for swipe navigation
+    private lateinit var gestureDetector: GestureDetector
+    
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lunisolar_month, container, false)
         
@@ -74,6 +80,9 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             val debug = LunisolarCalendar.debugLunarToGregorian(currentLunarYear, currentLunarMonth)
             android.util.Log.d("LunisolarDebug", debug)
         }
+        
+        // Setup swipe gesture detection
+        setupSwipeGestures()
         
         loadEventsAndUpdateDisplay()
         return view
@@ -408,9 +417,9 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 }
                 holiday != null -> {
                     val holidayColor = when (holiday.abbreviation) {
-                        "YUL" -> 0xFF4CAF50.toInt() // Green for Yule
-                        "SUM" -> 0xFFFF9800.toInt() // Orange for Sumarmal  
-                        "MID" -> 0xFFFFEB3B.toInt() // Yellow for Midsummer
+                        "YUL" -> 0xFFD32F2F.toInt() // Red for Yule
+                        "SUM" -> 0xFF4CAF50.toInt() // Green for Sumarmal  
+                        "MID" -> 0xFFF57F17.toInt() // Darker yellow for Midsummer
                         "WIN" -> 0xFF3F51B5.toInt() // Blue for Winter Nights
                         else -> 0xFFE91E63.toInt()  // Pink for other holidays
                     }
@@ -505,5 +514,47 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         intent.putExtra("day_code", dayCode)
         intent.putExtra("view_to_open", 5) // DAILY_VIEW
         startActivity(intent)
+    }
+    
+    private fun setupSwipeGestures() {
+        gestureDetector = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
+            private val SWIPE_THRESHOLD = 100
+            private val SWIPE_VELOCITY_THRESHOLD = 100
+            
+            override fun onFling(
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                velocityX: Float,
+                velocityY: Float
+            ): Boolean {
+                if (e1 == null) return false
+                
+                val diffX = e2.x - e1.x
+                val diffY = e2.y - e1.y
+                
+                return if (abs(diffX) > abs(diffY)) {
+                    if (abs(diffX) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffX > 0) {
+                            // Swipe right - go to previous month
+                            navigateToPreviousMonth()
+                        } else {
+                            // Swipe left - go to next month
+                            navigateToNextMonth()
+                        }
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            }
+        })
+        
+        // Apply gesture detection to the calendar grid
+        calendarGrid.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            false // Allow other touch events to be handled
+        }
     }
 } 

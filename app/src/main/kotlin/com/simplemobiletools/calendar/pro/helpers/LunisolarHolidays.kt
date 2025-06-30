@@ -160,27 +160,27 @@ object LunisolarHolidays {
         
         return when (holiday.abbreviation) {
             "YUL" -> when (dayNumber) {
-                1 -> "YUL" // Yule Night
-                2 -> "LOG" // Log Day  
-                3 -> "ASH" // Ash Day
+                1 -> "THOR" // Yule Night
+                2 -> "JOLA" // Log Day  
+                3 -> "SONA" // Ash Day
                 else -> "${holiday.abbreviation}$dayNumber"
             }
             "SUM" -> when (dayNumber) {
-                1 -> "SUM" // Sumarmal
-                2 -> "BLT" // Blót Day
-                3 -> "FLD" // Field Day
+                1 -> "SIGR" // Sumarmal
+                2 -> "GOA" // Blót Day
+                3 -> "GEFJ" // Field Day
                 else -> "${holiday.abbreviation}$dayNumber"
             }
             "MID" -> when (dayNumber) {
                 1 -> "MID" // Midsummer
-                2 -> "SUN" // Sun Day
-                3 -> "LIT" // Light Day
+                2 -> "MID" // Sun Day
+                3 -> "MID" // Light Day
                 else -> "${holiday.abbreviation}$dayNumber"
             }
             "WIN" -> when (dayNumber) {
-                1 -> "WIN" // Winter Nights
-                2 -> "ANX" // Ancestor Day
-                3 -> "DIS" // Disablót
+                1 -> "FREY" // Winter Nights
+                2 -> "DISA" // Ancestor Day
+                3 -> "ALFA" // Disablót
                 else -> "${holiday.abbreviation}$dayNumber"
             }
             else -> "${holiday.abbreviation}$dayNumber"

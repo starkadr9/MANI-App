@@ -4,11 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
     <item
-        android:id="@+id/go_to_today"
-        android:icon="@drawable/ic_today_vector"
-        android:title="@string/go_to_today"
-        app:showAsAction="always" />
-    <item
         android:id="@+id/change_view"
         android:icon="@drawable/ic_change_view_vector"
         android:title="@string/change_view"
@@ -27,10 +22,5 @@
         android:id="@+id/settings"
         android:icon="@drawable/ic_settings_cog_vector"
         android:title="@string/settings"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/about"
-        android:icon="@drawable/ic_info_vector"
-        android:title="@string/about"
         app:showAsAction="ifRoom" />
 </menu>
