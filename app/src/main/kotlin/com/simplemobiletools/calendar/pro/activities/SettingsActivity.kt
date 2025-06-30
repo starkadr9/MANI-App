@@ -84,10 +84,6 @@ class SettingsActivity : SimpleActivity() {
         setupReplaceDescription()
         setupWeekNumbers()
         setupShowGrid()
-        setupWeeklyStart()
-        setupMidnightSpanEvents()
-        setupAllowCustomizeDayCount()
-        setupStartWeekWithCurrentDay()
         setupVibrate()
         setupReminderSound()
         setupReminderAudioStream()
@@ -105,9 +101,6 @@ class SettingsActivity : SimpleActivity() {
         setupDefaultReminder2()
         setupDefaultReminder3()
         setupDisplayPastEvents()
-        setupFontSize()
-        setupCustomizeWidgetColors()
-        setupViewToOpenFromListWidget()
         setupDimEvents()
         setupDimCompletedTasks()
         setupAllowChangingTimeZones()
@@ -127,10 +120,8 @@ class SettingsActivity : SimpleActivity() {
             binding.settingsRemindersLabel,
             binding.settingsCaldavLabel,
             binding.settingsNewEventsLabel,
-            binding.settingsWeeklyViewLabel,
             binding.settingsMonthlyViewLabel,
             binding.settingsEventListsLabel,
-            binding.settingsWidgetsLabel,
             binding.settingsEventsLabel,
             binding.settingsTasksLabel,
             binding.settingsBackupsLabel,
@@ -433,43 +424,6 @@ class SettingsActivity : SimpleActivity() {
         }
     }
 
-    private fun setupWeeklyStart() = binding.apply {
-        settingsStartWeeklyAt.text = getHoursString(config.startWeeklyAt)
-        settingsStartWeeklyAtHolder.setOnClickListener {
-            val items = ArrayList<RadioItem>()
-            (0..16).mapTo(items) { RadioItem(it, getHoursString(it)) }
-
-            RadioGroupDialog(this@SettingsActivity, items, config.startWeeklyAt) {
-                config.startWeeklyAt = it as Int
-                settingsStartWeeklyAt.text = getHoursString(it)
-            }
-        }
-    }
-
-    private fun setupMidnightSpanEvents() = binding.apply {
-        settingsMidnightSpanEvent.isChecked = config.showMidnightSpanningEventsAtTop
-        settingsMidnightSpanEventsHolder.setOnClickListener {
-            settingsMidnightSpanEvent.toggle()
-            config.showMidnightSpanningEventsAtTop = settingsMidnightSpanEvent.isChecked
-        }
-    }
-
-    private fun setupAllowCustomizeDayCount() = binding.apply {
-        settingsAllowCustomizeDayCount.isChecked = config.allowCustomizeDayCount
-        settingsAllowCustomizeDayCountHolder.setOnClickListener {
-            settingsAllowCustomizeDayCount.toggle()
-            config.allowCustomizeDayCount = settingsAllowCustomizeDayCount.isChecked
-        }
-    }
-
-    private fun setupStartWeekWithCurrentDay() = binding.apply {
-        settingsStartWeekWithCurrentDay.isChecked = config.startWeekWithCurrentDay
-        settingsStartWeekWithCurrentDayHolder.setOnClickListener {
-            settingsStartWeekWithCurrentDay.toggle()
-            config.startWeekWithCurrentDay = settingsStartWeekWithCurrentDay.isChecked
-        }
-    }
-
     private fun setupWeekNumbers() = binding.apply {
         settingsWeekNumbers.isChecked = config.showWeekNumbers
         settingsWeekNumbersHolder.setOnClickListener {
@@ -665,66 +619,6 @@ class SettingsActivity : SimpleActivity() {
             getFormattedMinutes(displayPastEvents, false)
         }
     }
-
-    private fun setupFontSize() = binding.apply {
-        settingsFontSize.text = getFontSizeText()
-        settingsFontSizeHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(FONT_SIZE_SMALL, getString(com.simplemobiletools.commons.R.string.small)),
-                RadioItem(FONT_SIZE_MEDIUM, getString(com.simplemobiletools.commons.R.string.medium)),
-                RadioItem(FONT_SIZE_LARGE, getString(com.simplemobiletools.commons.R.string.large)),
-                RadioItem(FONT_SIZE_EXTRA_LARGE, getString(com.simplemobiletools.commons.R.string.extra_large))
-            )
-
-            RadioGroupDialog(this@SettingsActivity, items, config.fontSize) {
-                config.fontSize = it as Int
-                settingsFontSize.text = getFontSizeText()
-                updateWidgets()
-            }
-        }
-    }
-
-    private fun setupCustomizeWidgetColors() {
-        binding.settingsWidgetColorCustomizationHolder.setOnClickListener {
-            Intent(this, WidgetListConfigureActivity::class.java).apply {
-                putExtra(IS_CUSTOMIZING_COLORS, true)
-                startActivity(this)
-            }
-        }
-    }
-
-    private fun setupViewToOpenFromListWidget() = binding.apply {
-        settingsListWidgetViewToOpen.text = getDefaultViewText()
-        settingsListWidgetViewToOpenHolder.setOnClickListener {
-            val items = arrayListOf(
-                RadioItem(DAILY_VIEW, getString(R.string.daily_view)),
-                RadioItem(WEEKLY_VIEW, getString(R.string.weekly_view)),
-                RadioItem(MONTHLY_VIEW, getString(R.string.monthly_view)),
-                RadioItem(MONTHLY_DAILY_VIEW, getString(R.string.monthly_daily_view)),
-                RadioItem(YEARLY_VIEW, getString(R.string.yearly_view)),
-                RadioItem(EVENTS_LIST_VIEW, getString(R.string.simple_event_list)),
-                RadioItem(LAST_VIEW, getString(R.string.last_view))
-            )
-
-            RadioGroupDialog(this@SettingsActivity, items, config.listWidgetViewToOpen) {
-                config.listWidgetViewToOpen = it as Int
-                settingsListWidgetViewToOpen.text = getDefaultViewText()
-                updateWidgets()
-            }
-        }
-    }
-
-    private fun getDefaultViewText() = getString(
-        when (config.listWidgetViewToOpen) {
-            DAILY_VIEW -> R.string.daily_view
-            WEEKLY_VIEW -> R.string.weekly_view
-            MONTHLY_VIEW -> R.string.monthly_view
-            MONTHLY_DAILY_VIEW -> R.string.monthly_daily_view
-            YEARLY_VIEW -> R.string.yearly_view
-            EVENTS_LIST_VIEW -> R.string.simple_event_list
-            else -> R.string.last_view
-        }
-    )
 
     private fun setupDimEvents() = binding.apply {
         settingsDimPastEvents.isChecked = config.dimPastEvents
@@ -939,8 +833,6 @@ class SettingsActivity : SimpleActivity() {
                 put(APP_ICON_COLOR, config.appIconColor)
                 put(USE_ENGLISH, config.useEnglish)
                 put(WAS_USE_ENGLISH_TOGGLED, config.wasUseEnglishToggled)
-                put(WIDGET_BG_COLOR, config.widgetBgColor)
-                put(WIDGET_TEXT_COLOR, config.widgetTextColor)
                 put(WEEK_NUMBERS, config.showWeekNumbers)
                 put(START_WEEKLY_AT, config.startWeeklyAt)
                 put(SHOW_MIDNIGHT_SPANNING_EVENTS_AT_TOP, config.showMidnightSpanningEventsAtTop)
@@ -952,7 +844,6 @@ class SettingsActivity : SimpleActivity() {
                 put(LAST_EVENT_REMINDER_MINUTES_3, config.lastEventReminderMinutes3)
                 put(DISPLAY_PAST_EVENTS, config.displayPastEvents)
                 put(FONT_SIZE, config.fontSize)
-                put(LIST_WIDGET_VIEW_TO_OPEN, config.listWidgetViewToOpen)
                 put(REMINDER_AUDIO_STREAM, config.reminderAudioStream)
                 put(DISPLAY_DESCRIPTION, config.displayDescription)
                 put(REPLACE_DESCRIPTION, config.replaceDescription)
@@ -1049,8 +940,6 @@ class SettingsActivity : SimpleActivity() {
 
                 USE_ENGLISH -> config.useEnglish = value.toBoolean()
                 WAS_USE_ENGLISH_TOGGLED -> config.wasUseEnglishToggled = value.toBoolean()
-                WIDGET_BG_COLOR -> config.widgetBgColor = value.toInt()
-                WIDGET_TEXT_COLOR -> config.widgetTextColor = value.toInt()
                 WEEK_NUMBERS -> config.showWeekNumbers = value.toBoolean()
                 START_WEEKLY_AT -> config.startWeeklyAt = value.toInt()
                 SHOW_MIDNIGHT_SPANNING_EVENTS_AT_TOP -> config.showMidnightSpanningEventsAtTop = value.toBoolean()
@@ -1062,7 +951,6 @@ class SettingsActivity : SimpleActivity() {
                 LAST_EVENT_REMINDER_MINUTES_3 -> config.lastEventReminderMinutes3 = value.toInt()
                 DISPLAY_PAST_EVENTS -> config.displayPastEvents = value.toInt()
                 FONT_SIZE -> config.fontSize = value.toInt()
-                LIST_WIDGET_VIEW_TO_OPEN -> config.listWidgetViewToOpen = value.toInt()
                 REMINDER_AUDIO_STREAM -> config.reminderAudioStream = value.toInt()
                 DISPLAY_DESCRIPTION -> config.displayDescription = value.toBoolean()
                 REPLACE_DESCRIPTION -> config.replaceDescription = value.toBoolean()
@@ -1099,7 +987,6 @@ class SettingsActivity : SimpleActivity() {
             toast(msg)
 
             setupSettingItems()
-            updateWidgets()
         }
     }
 
@@ -1108,7 +995,6 @@ class SettingsActivity : SimpleActivity() {
         binding.settingsLunisolarCalendarHolder.setOnClickListener {
             binding.settingsLunisolarCalendar.toggle()
             config.useLunisolarCalendar = binding.settingsLunisolarCalendar.isChecked
-            updateWidgets()
         }
     }
 
@@ -1145,7 +1031,6 @@ class SettingsActivity : SimpleActivity() {
                                 config.lunisolarEpoch = year
                                 binding.settingsLunisolarEpoch.text = "${year} BC"
                                 LunisolarCalendar.setCustomEpoch(year)
-                                updateWidgets()
                             } else {
                                 toast("Please enter a valid year")
                             }
@@ -1156,7 +1041,6 @@ class SettingsActivity : SimpleActivity() {
                     config.lunisolarEpoch = selectedOption as Int
                     binding.settingsLunisolarEpoch.text = "${selectedOption} BC"
                     LunisolarCalendar.setCustomEpoch(selectedOption)
-                    updateWidgets()
                 }
             }
         }
@@ -1190,7 +1074,6 @@ class SettingsActivity : SimpleActivity() {
                     }
                 }
                 updateLunisolarMonthNamesText()
-                updateWidgets()
             }
         }
     }
@@ -1277,7 +1160,6 @@ class SettingsActivity : SimpleActivity() {
                     config.lunisolarMonthNames = namesString
                     LunisolarCalendar.setCustomMonthNames(newNames.toTypedArray())
                     updateLunisolarMonthNamesText()
-                    updateWidgets()
                     toast("Month names saved!")
                 } else {
                     toast("Please enter at least 12 month names")
@@ -1303,7 +1185,6 @@ class SettingsActivity : SimpleActivity() {
         settingsUseEldYearsHolder.setOnClickListener {
             settingsUseEldYears.toggle()
             config.useEldYears = settingsUseEldYears.isChecked
-            updateWidgets()
             // Force refresh of any active fragments
             recreate()
         }

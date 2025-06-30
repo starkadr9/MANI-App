@@ -146,6 +146,10 @@ object Formatter {
         }
     }
 
+    fun getDayCodeFromDate(year: Int, month: Int, day: Int): String {
+        return String.format("%04d%02d%02d", year, month, day)
+    }
+
     fun getUTCDayCodeFromTS(ts: Long) = getUTCDateTimeFromTS(ts).toString(DAYCODE_PATTERN)
 
     fun getYearFromDayCode(dayCode: String) = getDateTimeFromCode(dayCode).toString(YEAR_PATTERN)

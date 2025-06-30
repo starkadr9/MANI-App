@@ -63,22 +63,6 @@ class SetRemindersDialog(val activity: SimpleActivity, val eventType: Int, val c
                     setReminders3.text = activity.getFormattedMinutes(mReminder3Minutes)
                 }
             }
-
-            addEventAutomaticallyCheckbox.apply {
-                visibility = if (eventType == OTHER_EVENT) View.GONE else View.VISIBLE
-                text = when (eventType) {
-                    BIRTHDAY_EVENT -> activity.getString(R.string.add_birthdays_automatically)
-                    ANNIVERSARY_EVENT -> activity.getString(R.string.add_anniversaries_automatically)
-                    else -> ""
-                }
-                isChecked = when (eventType) {
-                    BIRTHDAY_EVENT -> activity.config.addBirthdaysAutomatically
-                    ANNIVERSARY_EVENT -> activity.config.addAnniversariesAutomatically
-                    else -> false
-                }
-                isAutomatic = isChecked
-                setOnCheckedChangeListener { _, isChecked -> isAutomatic = isChecked }
-            }
         }
 
         activity.getAlertDialogBuilder()
@@ -98,12 +82,10 @@ class SetRemindersDialog(val activity: SimpleActivity, val eventType: Int, val c
         )
 
         if (eventType == BIRTHDAY_EVENT) {
-            activity.config.addBirthdaysAutomatically = isAutomatic
             activity.config.birthdayReminders = reminders
         }
 
         if (eventType == ANNIVERSARY_EVENT) {
-            activity.config.addAnniversariesAutomatically = isAutomatic
             activity.config.anniversaryReminders = reminders
         }
 

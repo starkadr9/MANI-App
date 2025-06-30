@@ -7,7 +7,6 @@ import android.os.PowerManager
 import com.simplemobiletools.calendar.pro.extensions.eventsDB
 import com.simplemobiletools.calendar.pro.extensions.notifyEvent
 import com.simplemobiletools.calendar.pro.extensions.scheduleNextEventReminder
-import com.simplemobiletools.calendar.pro.extensions.updateListWidget
 import com.simplemobiletools.calendar.pro.helpers.EVENT_ID
 import com.simplemobiletools.calendar.pro.helpers.Formatter
 import com.simplemobiletools.calendar.pro.helpers.REMINDER_NOTIFICATION
@@ -30,7 +29,6 @@ class NotificationReceiver : BroadcastReceiver() {
             return
         }
 
-        context.updateListWidget()
         val event = context.eventsDB.getEventOrTaskWithId(id)
         if (event == null || event.getReminders().none { it.type == REMINDER_NOTIFICATION } || event.repetitionExceptions.contains(Formatter.getTodayCode())) {
             return

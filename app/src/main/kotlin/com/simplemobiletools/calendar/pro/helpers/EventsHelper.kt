@@ -119,7 +119,6 @@ class EventsHelper(val context: Context) {
         maybeUpdateParentExceptions(event)
         event.id = eventsDB.insertOrUpdate(event)
         ensureEventTypeVisibility(event, enableEventType)
-        context.updateWidgets()
         context.scheduleNextEventReminder(event, showToasts)
 
         if (addToCalDAV && config.caldavSync && event.source != SOURCE_SIMPLE_CALENDAR && event.source != SOURCE_IMPORTED_ICS) {
@@ -133,7 +132,6 @@ class EventsHelper(val context: Context) {
         maybeUpdateParentExceptions(task)
         task.id = eventsDB.insertOrUpdate(task)
         ensureEventTypeVisibility(task, enableEventType)
-        context.updateWidgets()
         context.scheduleNextEventReminder(task, showToasts)
         callback()
     }
@@ -165,14 +163,12 @@ class EventsHelper(val context: Context) {
                 }
             }
         } finally {
-            context.updateWidgets()
         }
     }
 
     fun updateEvent(event: Event, updateAtCalDAV: Boolean, showToasts: Boolean, enableEventType: Boolean = true, callback: (() -> Unit)? = null) {
         eventsDB.insertOrUpdate(event)
         ensureEventTypeVisibility(event, enableEventType)
-        context.updateWidgets()
         context.scheduleNextEventReminder(event, showToasts)
         if (updateAtCalDAV && event.source != SOURCE_SIMPLE_CALENDAR && config.caldavSync) {
             context.calDAVHelper.updateCalDAVEvent(event)
@@ -280,7 +276,6 @@ class EventsHelper(val context: Context) {
             }
 
             deleteChildEvents(it as MutableList<Long>, deleteFromCalDAV)
-            context.updateWidgets()
         }
     }
 

@@ -6,7 +6,6 @@ import android.content.Intent
 import com.simplemobiletools.calendar.pro.extensions.config
 import com.simplemobiletools.calendar.pro.extensions.recheckCalDAVCalendars
 import com.simplemobiletools.calendar.pro.extensions.refreshCalDAVCalendars
-import com.simplemobiletools.calendar.pro.extensions.updateWidgets
 
 class CalDAVSyncReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -15,7 +14,6 @@ class CalDAVSyncReceiver : BroadcastReceiver() {
         }
 
         context.recheckCalDAVCalendars(true) {
-            context.updateWidgets()
         }
     }
 }

@@ -98,10 +98,6 @@ class Config(context: Context) : BaseConfig(context) {
         quickFilterEventTypes = currQuickFilterEventTypes
     }
 
-    var listWidgetViewToOpen: Int
-        get() = prefs.getInt(LIST_WIDGET_VIEW_TO_OPEN, DAILY_VIEW)
-        set(viewToOpenFromListWidget) = prefs.edit().putInt(LIST_WIDGET_VIEW_TO_OPEN, viewToOpenFromListWidget).apply()
-
     var caldavSync: Boolean
         get() = prefs.getBoolean(CALDAV_SYNC, false)
         set(caldavSync) {
@@ -214,14 +210,6 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(ALLOW_CHANGING_TIME_ZONES, false)
         set(allowChangingTimeZones) = prefs.edit().putBoolean(ALLOW_CHANGING_TIME_ZONES, allowChangingTimeZones).apply()
 
-    var addBirthdaysAutomatically: Boolean
-        get() = prefs.getBoolean(ADD_BIRTHDAYS_AUTOMATICALLY, false)
-        set(addBirthdaysAutomatically) = prefs.edit().putBoolean(ADD_BIRTHDAYS_AUTOMATICALLY, addBirthdaysAutomatically).apply()
-
-    var addAnniversariesAutomatically: Boolean
-        get() = prefs.getBoolean(ADD_ANNIVERSARIES_AUTOMATICALLY, false)
-        set(addAnniversariesAutomatically) = prefs.edit().putBoolean(ADD_ANNIVERSARIES_AUTOMATICALLY, addAnniversariesAutomatically).apply()
-
     var birthdayReminders: ArrayList<Int>
         get() = prefs.getString(BIRTHDAY_REMINDERS, REMINDER_DEFAULT_VALUE)!!.split(",").map { it.toInt() }.toMutableList() as ArrayList<Int>
         set(birthdayReminders) = prefs.edit().putString(BIRTHDAY_REMINDERS, birthdayReminders.joinToString(",")).apply()
@@ -241,14 +229,6 @@ class Config(context: Context) : BaseConfig(context) {
     var exportPastEntries: Boolean
         get() = prefs.getBoolean(EXPORT_PAST_EVENTS, true)
         set(exportPastEvents) = prefs.edit().putBoolean(EXPORT_PAST_EVENTS, exportPastEvents).apply()
-
-    var weeklyViewItemHeightMultiplier: Float
-        get() = prefs.getFloat(WEEKLY_VIEW_ITEM_HEIGHT_MULTIPLIER, 1f)
-        set(weeklyViewItemHeightMultiplier) = prefs.edit().putFloat(WEEKLY_VIEW_ITEM_HEIGHT_MULTIPLIER, weeklyViewItemHeightMultiplier).apply()
-
-    var weeklyViewDays: Int
-        get() = prefs.getInt(WEEKLY_VIEW_DAYS, 7)
-        set(weeklyViewDays) = prefs.edit().putInt(WEEKLY_VIEW_DAYS, weeklyViewDays).apply()
 
     var highlightWeekends: Boolean
         get() = prefs.getBoolean(HIGHLIGHT_WEEKENDS, false)

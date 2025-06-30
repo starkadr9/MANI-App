@@ -52,23 +52,6 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/settings_widget_color_customization_holder"
-                style="@style/SettingsHolderTextViewOneLinerStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.simplemobiletools.commons.views.MyTextView
-                    android:id="@+id/settings_widget_color_customization_label"
-                    style="@style/SettingsTextLabelStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/customize_widget_colors"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
             <include
                 android:id="@+id/settings_color_customization_divider"
                 layout="@layout/divider" />
@@ -679,85 +662,6 @@
                 layout="@layout/divider" />
 
             <TextView
-                android:id="@+id/settings_weekly_view_label"
-                style="@style/SettingsSectionLabelStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/weekly_view" />
-
-            <RelativeLayout
-                android:id="@+id/settings_start_weekly_at_holder"
-                style="@style/SettingsHolderTextViewStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.simplemobiletools.commons.views.MyTextView
-                    android:id="@+id/settings_start_weekly_at_label"
-                    style="@style/SettingsTextLabelStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/start_day_at" />
-
-                <com.simplemobiletools.commons.views.MyTextView
-                    android:id="@+id/settings_start_weekly_at"
-                    style="@style/SettingsTextValueStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/settings_start_weekly_at_label"
-                    tools:text="7:00" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/settings_midnight_span_events_holder"
-                style="@style/SettingsHolderCheckboxStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.simplemobiletools.commons.views.MyAppCompatCheckbox
-                    android:id="@+id/settings_midnight_span_event"
-                    style="@style/SettingsCheckboxStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/midnight_spanning" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/settings_allow_customize_day_count_holder"
-                style="@style/SettingsHolderCheckboxStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.simplemobiletools.commons.views.MyAppCompatCheckbox
-                    android:id="@+id/settings_allow_customize_day_count"
-                    style="@style/SettingsCheckboxStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/allow_customizing_day_count" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/settings_start_week_with_current_day_holder"
-                style="@style/SettingsHolderCheckboxStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.simplemobiletools.commons.views.MyAppCompatCheckbox
-                    android:id="@+id/settings_start_week_with_current_day"
-                    style="@style/SettingsCheckboxStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/start_week_with_current_day" />
-
-            </RelativeLayout>
-
-            <include
-                android:id="@+id/settings_weekly_view_divider"
-                layout="@layout/divider" />
-
-            <TextView
                 android:id="@+id/settings_monthly_view_label"
                 style="@style/SettingsSectionLabelStyle"
                 android:layout_width="match_parent"
@@ -860,63 +764,6 @@
 
             <include
                 android:id="@+id/settings_event_lists_divider"
-                layout="@layout/divider" />
-
-            <TextView
-                android:id="@+id/settings_widgets_label"
-                style="@style/SettingsSectionLabelStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/widgets" />
-
-            <RelativeLayout
-                android:id="@+id/settings_font_size_holder"
-                style="@style/SettingsHolderTextViewStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.simplemobiletools.commons.views.MyTextView
-                    android:id="@+id/settings_font_size_label"
-                    style="@style/SettingsTextLabelStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/font_size" />
-
-                <com.simplemobiletools.commons.views.MyTextView
-                    android:id="@+id/settings_font_size"
-                    style="@style/SettingsTextValueStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/settings_font_size_label"
-                    tools:text="@string/medium" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/settings_list_widget_view_to_open_holder"
-                style="@style/SettingsHolderTextViewStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.simplemobiletools.commons.views.MyTextView
-                    android:id="@+id/settings_list_widget_view_to_open_label"
-                    style="@style/SettingsTextLabelStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/view_to_open_from_widget" />
-
-                <com.simplemobiletools.commons.views.MyTextView
-                    android:id="@+id/settings_list_widget_view_to_open"
-                    style="@style/SettingsTextValueStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/settings_list_widget_view_to_open_label"
-                    tools:text="@string/daily_view" />
-
-            </RelativeLayout>
-
-            <include
-                android:id="@+id/settings_widgets_divider"
                 layout="@layout/divider" />
 
             <TextView

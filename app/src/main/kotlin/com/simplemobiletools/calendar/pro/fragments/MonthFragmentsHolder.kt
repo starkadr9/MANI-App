@@ -102,53 +102,34 @@ class MonthFragmentsHolder : MyFragmentHolder(), NavigationListener {
 
     private fun getMonths(code: String): List<String> {
         val months = ArrayList<String>(PREFILLED_MONTHS)
-        
+        val today = Formatter.getDateTimeFromCode(code)
+
         if (requireContext().config.useLunisolarCalendar) {
-            // Lunisolar navigation: Year-based with proper month counting
-            val startDate = Formatter.getDateTimeFromCode(code)
-            val centerLunar = LunisolarCalendar.gregorianToLunar(startDate.year, startDate.monthOfYear, startDate.dayOfMonth)
-            
-            if (centerLunar.lunarDay != 0) {
-                // Start from several years before center to fill the ViewPager
-                val startYear = centerLunar.lunarYear - 15
-                val endYear = centerLunar.lunarYear + 15
-                var centerIndex = -1
-                
-                // Generate months year by year with proper counting
-                for (lunarYear in startYear..endYear) {
-                    val monthsInThisYear = LunisolarCalendar.getLunarMonthsInYear(lunarYear)
-                    
-                    // Iterate through actual months in this year (1 to 12 or 1 to 13)
-                    for (lunarMonth in 1..monthsInThisYear) {
-                        // Get the first day of this specific lunar month
-                        val firstDay = LunisolarCalendar.lunarToGregorian(lunarYear, lunarMonth, 1)
-                        if (firstDay != null) {
-                            val dayCode = String.format("%04d%02d%02d", firstDay.first, firstDay.second, firstDay.third)
-                            months.add(dayCode)
-                            
-                            // Track center position for current lunar year/month
-                            if (lunarYear == centerLunar.lunarYear && lunarMonth == centerLunar.lunarMonth) {
-                                centerIndex = months.size - 1
-                            }
-                        }
-                        
-                        // Stop when we have enough months
-                        if (months.size >= PREFILLED_MONTHS) break
-                    }
-                    
-                    if (months.size >= PREFILLED_MONTHS) break
+            val date = LunisolarCalendar.gregorianToLunar(today.year, today.monthOfYear, today.dayOfMonth)
+            if (date.lunarDay != 0) {
+                var lunarDate = date
+                // prefill previous months
+                for (i in 0 until PREFILLED_MONTHS / 2) {
+                    val prevMonth = LunisolarCalendar.getPreviousMonth(lunarDate.lunarYear, lunarDate.lunarMonth)
+                    lunarDate = LunisolarCalendar.gregorianToLunar(prevMonth.year, prevMonth.monthOfYear, prevMonth.dayOfMonth)
                 }
-                
-                // Set proper center position
-                defaultMonthlyPage = if (centerIndex >= 0) centerIndex else months.size / 2
+
+                for (i in 0 until PREFILLED_MONTHS) {
+                    val gregorianDate = LunisolarCalendar.lunarToGregorian(lunarDate.lunarYear, lunarDate.lunarMonth, 1)
+                    if (gregorianDate != null) {
+                        months.add(Formatter.getDayCodeFromDate(gregorianDate.first, gregorianDate.second, gregorianDate.third))
+                    }
+
+                    val nextMonth = LunisolarCalendar.getNextMonth(lunarDate.lunarYear, lunarDate.lunarMonth)
+                    lunarDate = LunisolarCalendar.gregorianToLunar(nextMonth.year, nextMonth.monthOfYear, nextMonth.dayOfMonth)
+                }
                 return months
             }
         }
-        
-        // Fallback to Gregorian months
-        val today = Formatter.getDateTimeFromCode(code).withDayOfMonth(1)
+
+        val firstDay = today.withDayOfMonth(1)
         for (i in -PREFILLED_MONTHS / 2..PREFILLED_MONTHS / 2) {
-            months.add(Formatter.getDayCodeFromDateTime(today.plusMonths(i)))
+            months.add(Formatter.getDayCodeFromDateTime(firstDay.plusMonths(i)))
         }
         return months
     }

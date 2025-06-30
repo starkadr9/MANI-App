@@ -86,7 +86,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         refreshMenuItems()
         updateMaterialActivityViews(binding.mainCoordinator, binding.mainHolder, useTransparentNavigation = false, useTopSearchMenu = true)
 
-        checkWhatsNewDialog()
         binding.calendarFab.beVisibleIf(config.storedView != YEARLY_VIEW && config.storedView != WEEKLY_VIEW)
         binding.calendarFab.setOnClickListener {
             if (config.allowCreatingTasks) {
@@ -144,8 +143,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             checkCalDAVUpdateListener()
         }
 
-        addBirthdaysAnniversariesAtStart()
-
         if (isPackageInstalled("com.simplemobiletools.calendar")) {
             ConfirmationDialog(
                 activity = this,
@@ -195,7 +192,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         binding.apply {
             mainMenu.updateColors()
             storeStateVariables()
-            updateWidgets()
             updateTextColors(calendarCoordinator)
             fabExtendedOverlay.background = ColorDrawable(getProperBackgroundColor().adjustAlpha(0.8f))
             fabEventLabel.setTextColor(getProperTextColor())
@@ -241,12 +237,9 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         shouldGoToTodayBeVisible = currentFragments.lastOrNull()?.shouldGoToTodayBeVisible() ?: false
         binding.mainMenu.getToolbar().menu.apply {
             goToTodayButton = findItem(R.id.go_to_today)
-            findItem(R.id.print).isVisible = config.storedView != MONTHLY_DAILY_VIEW
             findItem(R.id.filter).isVisible = mShouldFilterBeVisible
             findItem(R.id.go_to_today).isVisible = shouldGoToTodayBeVisible && !binding.mainMenu.isSearchOpen
-            findItem(R.id.go_to_date).isVisible = config.storedView != EVENTS_LIST_VIEW
             findItem(R.id.refresh_caldav_calendars).isVisible = config.caldavSync
-            findItem(R.id.more_apps_from_us).isVisible = !resources.getBoolean(com.simplemobiletools.commons.R.bool.hide_google_relations)
         }
     }
 
@@ -267,14 +260,8 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             when (menuItem.itemId) {
                 R.id.change_view -> showViewDialog()
                 R.id.go_to_today -> goToToday()
-                R.id.go_to_date -> showGoToDateDialog()
-                R.id.print -> printView()
                 R.id.filter -> showFilterDialog()
                 R.id.refresh_caldav_calendars -> refreshCalDAVCalendars(true)
-                R.id.add_holidays -> addHolidays()
-                R.id.add_birthdays -> tryAddBirthdays()
-                R.id.add_anniversaries -> tryAddAnniversaries()
-                R.id.more_apps_from_us -> launchMoreAppsFromUsIntent()
                 R.id.settings -> launchSettings()
                 R.id.about -> launchAbout()
                 else -> return@setOnMenuItemClickListener false
@@ -331,7 +318,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
                 }
 
                 refreshViewPager()
-                updateWidgets()
             }
         }
     }
@@ -492,11 +478,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     private fun showViewDialog() {
         val items = arrayListOf(
             RadioItem(DAILY_VIEW, getString(R.string.daily_view)),
-            RadioItem(WEEKLY_VIEW, getString(R.string.weekly_view)),
-            RadioItem(MONTHLY_VIEW, getString(R.string.monthly_view)),
-            RadioItem(MONTHLY_DAILY_VIEW, getString(R.string.monthly_daily_view)),
-            RadioItem(YEARLY_VIEW, getString(R.string.yearly_view)),
-            RadioItem(EVENTS_LIST_VIEW, getString(R.string.simple_event_list))
+            RadioItem(MONTHLY_VIEW, getString(R.string.monthly_view))
         )
 
         RadioGroupDialog(this, items, config.storedView) {
@@ -531,7 +513,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
                 refreshViewPager()
                 setupQuickFilter()
-                updateWidgets()
             }
         }
     }
@@ -572,312 +553,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         runOnUiThread {
             binding.swipeRefreshLayout.isRefreshing = false
         }
-    }
-
-    private fun addHolidays() {
-        val items = getHolidayRadioItems()
-        
-        // Add Germanic Holidays option if lunisolar calendar is enabled
-        if (config.useLunisolarCalendar) {
-            items.add(0, RadioItem(items.size + 1, "Germanic Traditional Holidays", "GERMANIC_HOLIDAYS"))
-        }
-        
-        RadioGroupDialog(this, items) { selectedHoliday ->
-            if (selectedHoliday == "GERMANIC_HOLIDAYS") {
-                addGermanicHolidays()
-            } else {
-                SetRemindersDialog(this, OTHER_EVENT) {
-                    val reminders = it
-                    toast(com.simplemobiletools.commons.R.string.importing)
-                    ensureBackgroundThread {
-                        val holidays = getString(R.string.holidays)
-                        var eventTypeId = eventsHelper.getEventTypeIdWithClass(HOLIDAY_EVENT)
-                        if (eventTypeId == -1L) {
-                            eventTypeId = eventsHelper.createPredefinedEventType(holidays, R.color.default_holidays_color, HOLIDAY_EVENT, true)
-                        }
-                        val result = IcsImporter(this).importEvents(selectedHoliday as String, eventTypeId, 0, false, reminders)
-                        handleParseResult(result)
-                        if (result != ImportResult.IMPORT_FAIL) {
-                            runOnUiThread {
-                                updateViewPager()
-                                setupQuickFilter()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun addGermanicHolidays() {
-        toast("Germanic holidays feature will be available in future updates")
-    }
-
-    private fun tryAddBirthdays() {
-        handlePermission(PERMISSION_READ_CONTACTS) {
-            if (it) {
-                SetRemindersDialog(this, BIRTHDAY_EVENT) {
-                    val reminders = it
-                    val privateCursor = getMyContactsCursor(false, false)
-
-                    ensureBackgroundThread {
-                        val privateContacts = MyContactsContentProvider.getSimpleContacts(this, privateCursor)
-                        addPrivateEvents(true, privateContacts, reminders) { eventsFound, eventsAdded ->
-                            addContactEvents(true, reminders, eventsFound, eventsAdded) {
-                                when {
-                                    it > 0 -> {
-                                        toast(R.string.birthdays_added)
-                                        updateViewPager()
-                                        setupQuickFilter()
-                                    }
-
-                                    it == -1 -> toast(R.string.no_new_birthdays)
-                                    else -> toast(R.string.no_birthdays)
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                toast(com.simplemobiletools.commons.R.string.no_contacts_permission)
-            }
-        }
-    }
-
-    private fun tryAddAnniversaries() {
-        handlePermission(PERMISSION_READ_CONTACTS) {
-            if (it) {
-                SetRemindersDialog(this, ANNIVERSARY_EVENT) {
-                    val reminders = it
-                    val privateCursor = getMyContactsCursor(false, false)
-
-                    ensureBackgroundThread {
-                        val privateContacts = MyContactsContentProvider.getSimpleContacts(this, privateCursor)
-                        addPrivateEvents(false, privateContacts, reminders) { eventsFound, eventsAdded ->
-                            addContactEvents(false, reminders, eventsFound, eventsAdded) {
-                                when {
-                                    it > 0 -> {
-                                        toast(R.string.anniversaries_added)
-                                        updateViewPager()
-                                        setupQuickFilter()
-                                    }
-
-                                    it == -1 -> toast(R.string.no_new_anniversaries)
-                                    else -> toast(R.string.no_anniversaries)
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                toast(com.simplemobiletools.commons.R.string.no_contacts_permission)
-            }
-        }
-    }
-
-    private fun addBirthdaysAnniversariesAtStart() {
-        if ((!config.addBirthdaysAutomatically && !config.addAnniversariesAutomatically) || !hasPermission(PERMISSION_READ_CONTACTS)) {
-            return
-        }
-
-        val privateCursor = getMyContactsCursor(false, false)
-
-        ensureBackgroundThread {
-            val privateContacts = MyContactsContentProvider.getSimpleContacts(this, privateCursor)
-            if (config.addBirthdaysAutomatically) {
-                addPrivateEvents(true, privateContacts, config.birthdayReminders) { eventsFound, eventsAdded ->
-                    addContactEvents(true, config.birthdayReminders, eventsFound, eventsAdded) {
-                        if (it > 0) {
-                            toast(R.string.birthdays_added)
-                            updateViewPager()
-                            setupQuickFilter()
-                        }
-                    }
-                }
-            }
-
-            if (config.addAnniversariesAutomatically) {
-                addPrivateEvents(false, privateContacts, config.anniversaryReminders) { eventsFound, eventsAdded ->
-                    addContactEvents(false, config.anniversaryReminders, eventsFound, eventsAdded) {
-                        if (it > 0) {
-                            toast(R.string.anniversaries_added)
-                            updateViewPager()
-                            setupQuickFilter()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun handleParseResult(result: ImportResult) {
-        toast(
-            when (result) {
-                ImportResult.IMPORT_NOTHING_NEW -> com.simplemobiletools.commons.R.string.no_new_items
-                ImportResult.IMPORT_OK -> R.string.holidays_imported_successfully
-                ImportResult.IMPORT_PARTIAL -> R.string.importing_some_holidays_failed
-                else -> R.string.importing_holidays_failed
-            }, Toast.LENGTH_LONG
-        )
-    }
-
-    private fun addContactEvents(birthdays: Boolean, reminders: ArrayList<Int>, initEventsFound: Int, initEventsAdded: Int, callback: (Int) -> Unit) {
-        var eventsFound = initEventsFound
-        var eventsAdded = initEventsAdded
-        val uri = Data.CONTENT_URI
-        val projection = arrayOf(
-            Contacts.DISPLAY_NAME,
-            CommonDataKinds.Event.CONTACT_ID,
-            CommonDataKinds.Event.CONTACT_LAST_UPDATED_TIMESTAMP,
-            CommonDataKinds.Event.START_DATE
-        )
-
-        val selection = "${Data.MIMETYPE} = ? AND ${CommonDataKinds.Event.TYPE} = ?"
-        val type = if (birthdays) CommonDataKinds.Event.TYPE_BIRTHDAY else CommonDataKinds.Event.TYPE_ANNIVERSARY
-        val selectionArgs = arrayOf(CommonDataKinds.Event.CONTENT_ITEM_TYPE, type.toString())
-
-        val dateFormats = getDateFormats()
-        val yearDateFormats = getDateFormatsWithYear()
-        val existingEvents = if (birthdays) eventsDB.getBirthdays() else eventsDB.getAnniversaries()
-        val importIDs = HashMap<String, Long>()
-        existingEvents.forEach {
-            importIDs[it.importId] = it.startTS
-        }
-
-        val eventTypeId = if (birthdays) eventsHelper.getLocalBirthdaysEventTypeId() else eventsHelper.getAnniversariesEventTypeId()
-        val source = if (birthdays) SOURCE_CONTACT_BIRTHDAY else SOURCE_CONTACT_ANNIVERSARY
-
-        queryCursor(uri, projection, selection, selectionArgs, showErrors = true) { cursor ->
-            val contactId = cursor.getIntValue(CommonDataKinds.Event.CONTACT_ID).toString()
-            val name = cursor.getStringValue(Contacts.DISPLAY_NAME)
-            val startDate = cursor.getStringValue(CommonDataKinds.Event.START_DATE)
-
-            for (format in dateFormats) {
-                try {
-                    val formatter = SimpleDateFormat(format, Locale.getDefault())
-                    val date = formatter.parse(startDate)
-                    val flags = if (format in yearDateFormats) {
-                        FLAG_ALL_DAY
-                    } else {
-                        FLAG_ALL_DAY or FLAG_MISSING_YEAR
-                    }
-
-                    val timestamp = date.time / 1000L
-                    val lastUpdated = cursor.getLongValue(CommonDataKinds.Event.CONTACT_LAST_UPDATED_TIMESTAMP)
-                    val event = Event(
-                        null, timestamp, timestamp, name, reminder1Minutes = reminders[0], reminder2Minutes = reminders[1],
-                        reminder3Minutes = reminders[2], importId = contactId, timeZone = DateTimeZone.getDefault().id, flags = flags,
-                        repeatInterval = YEAR, repeatRule = REPEAT_SAME_DAY, eventType = eventTypeId, source = source, lastUpdated = lastUpdated
-                    )
-
-                    val importIDsToDelete = ArrayList<String>()
-                    for ((key, value) in importIDs) {
-                        if (key == contactId && value != timestamp) {
-                            val deleted = eventsDB.deleteBirthdayAnniversary(source, key)
-                            if (deleted == 1) {
-                                importIDsToDelete.add(key)
-                            }
-                        }
-                    }
-
-                    importIDsToDelete.forEach {
-                        importIDs.remove(it)
-                    }
-
-                    eventsFound++
-                    if (!importIDs.containsKey(contactId)) {
-                        // avoid adding duplicate birthdays/anniversaries
-                        if (existingEvents.none { it.title == event.title && it.startTS == event.startTS }) {
-                            eventsHelper.insertEvent(event, false, false) {
-                                eventsAdded++
-                            }
-                        }
-                    }
-                    break
-                } catch (e: Exception) {
-                }
-            }
-        }
-
-        runOnUiThread {
-            callback(if (eventsAdded == 0 && eventsFound > 0) -1 else eventsAdded)
-        }
-    }
-
-    private fun addPrivateEvents(
-        birthdays: Boolean,
-        contacts: ArrayList<SimpleContact>,
-        reminders: ArrayList<Int>,
-        callback: (eventsFound: Int, eventsAdded: Int) -> Unit
-    ) {
-        var eventsAdded = 0
-        var eventsFound = 0
-        if (contacts.isEmpty()) {
-            callback(0, 0)
-            return
-        }
-
-        try {
-            val eventTypeId = if (birthdays) eventsHelper.getLocalBirthdaysEventTypeId() else eventsHelper.getAnniversariesEventTypeId()
-            val source = if (birthdays) SOURCE_CONTACT_BIRTHDAY else SOURCE_CONTACT_ANNIVERSARY
-
-            val existingEvents = if (birthdays) eventsDB.getBirthdays() else eventsDB.getAnniversaries()
-            val importIDs = HashMap<String, Long>()
-            existingEvents.forEach {
-                importIDs[it.importId] = it.startTS
-            }
-
-            contacts.forEach { contact ->
-                val events = if (birthdays) contact.birthdays else contact.anniversaries
-                events.forEach { birthdayAnniversary ->
-                    // private contacts are created in Simple Contacts Pro, so we can guarantee that they exist only in these 2 formats
-                    val format = if (birthdayAnniversary.startsWith("--")) {
-                        "--MM-dd"
-                    } else {
-                        "yyyy-MM-dd"
-                    }
-
-                    val formatter = SimpleDateFormat(format, Locale.getDefault())
-                    val date = formatter.parse(birthdayAnniversary)
-                    if (date.year < 70) {
-                        date.year = 70
-                    }
-
-                    val timestamp = date.time / 1000L
-                    val lastUpdated = System.currentTimeMillis()
-                    val event = Event(
-                        null, timestamp, timestamp, contact.name, reminder1Minutes = reminders[0], reminder2Minutes = reminders[1],
-                        reminder3Minutes = reminders[2], importId = contact.contactId.toString(), timeZone = DateTimeZone.getDefault().id, flags = FLAG_ALL_DAY,
-                        repeatInterval = YEAR, repeatRule = REPEAT_SAME_DAY, eventType = eventTypeId, source = source, lastUpdated = lastUpdated
-                    )
-
-                    val importIDsToDelete = ArrayList<String>()
-                    for ((key, value) in importIDs) {
-                        if (key == contact.contactId.toString() && value != timestamp) {
-                            val deleted = eventsDB.deleteBirthdayAnniversary(source, key)
-                            if (deleted == 1) {
-                                importIDsToDelete.add(key)
-                            }
-                        }
-                    }
-
-                    importIDsToDelete.forEach {
-                        importIDs.remove(it)
-                    }
-
-                    eventsFound++
-                    if (!importIDs.containsKey(contact.contactId.toString())) {
-                        eventsHelper.insertEvent(event, false, false) {
-                            eventsAdded++
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            showErrorToast(e)
-        }
-
-        callback(eventsFound, eventsAdded)
     }
 
     private fun updateView(view: Int) {
@@ -1040,7 +715,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         MONTHLY_DAILY_VIEW -> MonthDayFragmentsHolder()
         YEARLY_VIEW -> YearFragmentsHolder()
         EVENTS_LIST_VIEW -> EventListFragment()
-        else -> WeekFragmentsHolder()
+        else -> MonthFragmentsHolder()
     }
 
     private fun removeTopFragment() {
@@ -1358,58 +1033,5 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         }
 
         return items
-    }
-
-    private fun checkWhatsNewDialog() {
-        arrayListOf<Release>().apply {
-            add(Release(39, R.string.release_39))
-            add(Release(40, R.string.release_40))
-            add(Release(42, R.string.release_42))
-            add(Release(44, R.string.release_44))
-            add(Release(46, R.string.release_46))
-            add(Release(48, R.string.release_48))
-            add(Release(49, R.string.release_49))
-            add(Release(51, R.string.release_51))
-            add(Release(52, R.string.release_52))
-            add(Release(54, R.string.release_54))
-            add(Release(57, R.string.release_57))
-            add(Release(59, R.string.release_59))
-            add(Release(60, R.string.release_60))
-            add(Release(62, R.string.release_62))
-            add(Release(67, R.string.release_67))
-            add(Release(69, R.string.release_69))
-            add(Release(71, R.string.release_71))
-            add(Release(73, R.string.release_73))
-            add(Release(76, R.string.release_76))
-            add(Release(77, R.string.release_77))
-            add(Release(80, R.string.release_80))
-            add(Release(84, R.string.release_84))
-            add(Release(86, R.string.release_86))
-            add(Release(88, R.string.release_88))
-            add(Release(98, R.string.release_98))
-            add(Release(117, R.string.release_117))
-            add(Release(119, R.string.release_119))
-            add(Release(129, R.string.release_129))
-            add(Release(143, R.string.release_143))
-            add(Release(155, R.string.release_155))
-            add(Release(167, R.string.release_167))
-            checkWhatsNew(this, BuildConfig.VERSION_CODE)
-        }
-    }
-
-    // TEMPORARY: Test function for lunisolar calculations
-    private fun testLunisolarCalculations() {
-        ensureBackgroundThread {
-            val testResults = LunisolarCalendar.runBasicTests()
-            runOnUiThread {
-                android.util.Log.d("LUNISOLAR_TEST", testResults)
-                // Also show in a dialog for easy viewing
-                android.app.AlertDialog.Builder(this@MainActivity)
-                    .setTitle("Lunisolar Calendar Test Results")
-                    .setMessage(testResults)
-                    .setPositiveButton("OK", null)
-                    .show()
-            }
-        }
     }
 }

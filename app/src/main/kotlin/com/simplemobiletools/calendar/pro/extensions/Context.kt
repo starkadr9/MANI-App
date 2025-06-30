@@ -58,47 +58,6 @@ val Context.completedTasksDB: TasksDao get() = EventsDatabase.getInstance(applic
 val Context.eventsHelper: EventsHelper get() = EventsHelper(this)
 val Context.calDAVHelper: CalDAVHelper get() = CalDAVHelper(this)
 
-fun Context.updateWidgets() {
-    val widgetIDs = AppWidgetManager.getInstance(applicationContext)?.getAppWidgetIds(ComponentName(applicationContext, MyWidgetMonthlyProvider::class.java))
-        ?: return
-    if (widgetIDs.isNotEmpty()) {
-        Intent(applicationContext, MyWidgetMonthlyProvider::class.java).apply {
-            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIDs)
-            sendBroadcast(this)
-        }
-    }
-
-    updateListWidget()
-    updateDateWidget()
-}
-
-fun Context.updateListWidget() {
-    val widgetIDs = AppWidgetManager.getInstance(applicationContext)?.getAppWidgetIds(ComponentName(applicationContext, MyWidgetListProvider::class.java))
-        ?: return
-
-    if (widgetIDs.isNotEmpty()) {
-        Intent(applicationContext, MyWidgetListProvider::class.java).apply {
-            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIDs)
-            sendBroadcast(this)
-        }
-    }
-    AppWidgetManager.getInstance(applicationContext)?.notifyAppWidgetViewDataChanged(widgetIDs, R.id.widget_event_list)
-}
-
-fun Context.updateDateWidget() {
-    val widgetIDs = AppWidgetManager.getInstance(applicationContext)?.getAppWidgetIds(ComponentName(applicationContext, MyWidgetDateProvider::class.java))
-        ?: return
-    if (widgetIDs.isNotEmpty()) {
-        Intent(applicationContext, MyWidgetDateProvider::class.java).apply {
-            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIDs)
-            sendBroadcast(this)
-        }
-    }
-}
-
 fun Context.scheduleAllEvents() {
     val events = eventsDB.getEventsOrTasksAtReboot(getNowSeconds())
     events.forEach {
@@ -548,7 +507,6 @@ fun Context.recheckCalDAVCalendars(scheduleNextCalDAVSync: Boolean, callback: ()
     if (config.caldavSync) {
         ensureBackgroundThread {
             calDAVHelper.refreshCalendars(false, scheduleNextCalDAVSync, callback)
-            updateWidgets()
         }
     }
 }
@@ -721,24 +679,6 @@ fun Context.refreshCalDAVCalendars(ids: String, showToasts: Boolean) {
             ContentResolver.requestSync(it, uri.authority, this)
         }
     }
-}
-
-fun Context.getWidgetFontSize() = when (config.fontSize) {
-    FONT_SIZE_SMALL -> getWidgetSmallFontSize()
-    FONT_SIZE_MEDIUM -> getWidgetMediumFontSize()
-    FONT_SIZE_LARGE -> getWidgetLargeFontSize()
-    else -> getWidgetExtraLargeFontSize()
-}
-
-fun Context.getWidgetSmallFontSize() = getWidgetMediumFontSize() - 3f
-fun Context.getWidgetMediumFontSize() = resources.getDimension(R.dimen.day_text_size) / resources.displayMetrics.density
-fun Context.getWidgetLargeFontSize() = getWidgetMediumFontSize() + 3f
-fun Context.getWidgetExtraLargeFontSize() = getWidgetMediumFontSize() + 6f
-
-fun Context.getWeeklyViewItemHeight(): Float {
-    val defaultHeight = resources.getDimension(R.dimen.weekly_view_row_height)
-    val multiplier = config.weeklyViewItemHeightMultiplier
-    return defaultHeight * multiplier
 }
 
 fun Context.printBitmap(bitmap: Bitmap) {

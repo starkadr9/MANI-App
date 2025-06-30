@@ -1,5 +1,8 @@
 package com.simplemobiletools.calendar.pro.helpers
 
+import com.simplemobiletools.calendar.pro.helpers.LunisolarCalendar.gregorianToLunar
+import com.simplemobiletools.calendar.pro.helpers.LunisolarCalendar.lunarToGregorian
+import org.joda.time.DateTime
 import kotlin.math.*
 
 /**
@@ -281,7 +284,9 @@ object LunisolarCalendar {
             val nextMonthStartJD = findNextPhaseJD(monthStartJD, 2)
             
             if (targetJD >= monthStartJD - epsilon && targetJD < nextMonthStartJD - epsilon) {
-                val lunarDay = floor(targetJD - monthStartJD).toInt() + 1
+                val monthStartDayJD = floor(monthStartJD + 0.5) - 0.5
+                val targetDayJD = floor(targetJD + 0.5) - 0.5
+                val lunarDay = (targetDayJD - monthStartDayJD).toInt() + 1
                 
                 // Calculate metonic position
                 val yearSince1AD = maxOf(lunarYearId - 1, 0)
@@ -319,23 +324,23 @@ object LunisolarCalendar {
         if (lunarMonth < 1 || lunarMonth > monthsInYear || lunarDay < 1) {
             return null
         }
-        
-        val yearStartJD = calculateLunarNewYearJD(lunarYear)
-        var monthStartJD = yearStartJD
-        
-        // Navigate to the correct month
+
+        var monthStartJD = calculateLunarNewYearJD(lunarYear)
         repeat(lunarMonth - 1) {
             monthStartJD = findNextPhaseJD(monthStartJD, 2)
         }
-        
-        // Validate day within month bounds
+
+        val monthStartDayJD = floor(monthStartJD + 0.5) - 0.5
+
         val nextMonthStartJD = findNextPhaseJD(monthStartJD, 2)
-        val monthLength = floor(nextMonthStartJD - monthStartJD + 0.5).toInt()
+        val nextMonthStartDayJD = floor(nextMonthStartJD + 0.5) - 0.5
+        val monthLength = (nextMonthStartDayJD - monthStartDayJD).toInt()
+
         if (lunarDay > monthLength) {
             return null
         }
         
-        val targetJD = monthStartJD + (lunarDay - 1)
+        val targetJD = monthStartDayJD + (lunarDay - 1)
         return julianDayToGregorian(targetJD)
     }
 
@@ -346,15 +351,16 @@ object LunisolarCalendar {
         val monthsInYear = getLunarMonthsInYear(lunarYear)
         if (lunarMonth < 1 || lunarMonth > monthsInYear) return 0
         
-        val yearStartJD = calculateLunarNewYearJD(lunarYear)
-        var monthStartJD = yearStartJD
-        
+        var monthStartJD = calculateLunarNewYearJD(lunarYear)
         repeat(lunarMonth - 1) {
             monthStartJD = findNextPhaseJD(monthStartJD, 2)
         }
         
         val nextMonthStartJD = findNextPhaseJD(monthStartJD, 2)
-        return floor(nextMonthStartJD - monthStartJD + 0.5).toInt()
+
+        val monthStartDayJD = floor(monthStartJD + 0.5) - 0.5
+        val nextMonthStartDayJD = floor(nextMonthStartJD + 0.5) - 0.5
+        return (nextMonthStartDayJD - monthStartDayJD).toInt()
     }
 
     // === TEST FUNCTIONS ===
@@ -513,5 +519,29 @@ object LunisolarCalendar {
         }
         
         return result.toString()
+    }
+
+    fun getPreviousMonth(lunarYear: Int, lunarMonth: Int): DateTime {
+        var prevMonth = lunarMonth - 1
+        var prevYear = lunarYear
+        if (prevMonth < 1) {
+            prevYear--
+            prevMonth = getLunarMonthsInYear(prevYear)
+        }
+
+        val gregorian = lunarToGregorian(prevYear, prevMonth, 1)!!
+        return DateTime(gregorian.first, gregorian.second, gregorian.third, 0, 0)
+    }
+
+    fun getNextMonth(lunarYear: Int, lunarMonth: Int): DateTime {
+        var nextMonth = lunarMonth + 1
+        var nextYear = lunarYear
+        if (nextMonth > getLunarMonthsInYear(lunarYear)) {
+            nextYear++
+            nextMonth = 1
+        }
+
+        val gregorian = lunarToGregorian(nextYear, nextMonth, 1)!!
+        return DateTime(gregorian.first, gregorian.second, gregorian.third, 0, 0)
     }
 } 

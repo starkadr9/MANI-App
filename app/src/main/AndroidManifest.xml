@@ -88,37 +88,6 @@
         </activity>
 
         <activity
-            android:name=".activities.WidgetMonthlyConfigureActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/MyWidgetConfigTheme">
-
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".activities.WidgetListConfigureActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/MyWidgetConfigTheme">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".activities.WidgetDateConfigureActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/MyWidgetConfigTheme">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
-        <activity
             android:name="com.simplemobiletools.commons.activities.AboutActivity"
             android:configChanges="orientation"
             android:exported="false"
@@ -212,58 +181,6 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:theme="@style/Theme.Transparent" />
-
-        <receiver
-            android:name=".helpers.MyWidgetMonthlyProvider"
-            android:exported="true"
-            android:icon="@drawable/img_widget_monthly_preview"
-            android:label="@string/widget_monthly">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_monthly_info" />
-        </receiver>
-
-        <receiver
-            android:name=".helpers.MyWidgetListProvider"
-            android:exported="true"
-            android:icon="@drawable/img_widget_list_preview"
-            android:label="@string/widget_list">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_list_info" />
-        </receiver>
-
-        <receiver
-            android:name=".helpers.MyWidgetDateProvider"
-            android:exported="true"
-            android:icon="@drawable/img_widget_date_preview"
-            android:label="@string/widget_todays_date">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_date_info" />
-        </receiver>
-
-        <service
-            android:name=".services.WidgetService"
-            android:exported="true"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-
-        <service
-            android:name=".services.WidgetServiceEmpty"
-            android:exported="true"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <service android:name=".services.SnoozeService" />
         <service android:name=".services.MarkCompletedService" />

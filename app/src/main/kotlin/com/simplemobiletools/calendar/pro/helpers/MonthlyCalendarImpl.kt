@@ -59,18 +59,17 @@ class MonthlyCalendarImpl(val callback: MonthlyCalendar, val context: Context) {
         var isThisMonth = false
         var isToday: Boolean
         var value = prevMonthDays - firstDayIndex + 1
-        var curDay = mTargetDate
+        var curDay = mTargetDate.withDayOfMonth(1).minusMonths(1).withDayOfMonth(value)
 
         for (i in 0 until DAYS_CNT) {
             when {
                 i < firstDayIndex -> {
                     isThisMonth = false
-                    curDay = mTargetDate.withDayOfMonth(1).minusMonths(1)
                 }
                 i == firstDayIndex -> {
                     value = 1
                     isThisMonth = true
-                    curDay = mTargetDate
+                    curDay = mTargetDate.withDayOfMonth(1)
                 }
                 value == currMonthDays + 1 -> {
                     value = 1
@@ -91,59 +90,46 @@ class MonthlyCalendarImpl(val callback: MonthlyCalendar, val context: Context) {
     }
 
     private fun getLunisolarDays(): ArrayList<DayMonthly> {
-        // Convert current Gregorian date to lunisolar to find current lunar month
-        val currentLunar = LunisolarCalendar.gregorianToLunar(mTargetDate.year, mTargetDate.monthOfYear, mTargetDate.dayOfMonth)
-        
-        // Handle edge cases
-        if (currentLunar.lunarDay == 0) return getGregorianDays()
-        
-        val lunarYear = currentLunar.lunarYear
-        val lunarMonth = currentLunar.lunarMonth
-        val monthLength = LunisolarCalendar.getLunarMonthLength(lunarYear, lunarMonth)
-        
-        // Calculate grid size (need at least 5 weeks for 29-30 days)
-        val gridSize = if (monthLength <= 28) 35 else 42 // 5 or 6 weeks
-        val days = ArrayList<DayMonthly>(gridSize)
-        
-        // Get first day of lunar month in Gregorian
-        val firstDayGregorian = LunisolarCalendar.lunarToGregorian(lunarYear, lunarMonth, 1)
-        if (firstDayGregorian == null) return getGregorianDays()
-        
-        val firstDayJD = LunisolarCalendar.gregorianToJulianDay(firstDayGregorian.first, firstDayGregorian.second, firstDayGregorian.third)
-        val firstDayOfWeek = LunisolarCalendar.calculateWeekday(firstDayGregorian.first, firstDayGregorian.second, firstDayGregorian.third)
-        val firstDayIndex = firstDayOfWeek.ordinal // 0=Sunday, 1=Monday, etc.
-        
-        // Build the grid
-        for (i in 0 until gridSize) {
-            val currentJD = firstDayJD - firstDayIndex + i
-            val (gYear, gMonth, gDay) = LunisolarCalendar.julianDayToGregorian(currentJD)
-            
-            // Convert each day to lunar date
-            val dayLunar = LunisolarCalendar.gregorianToLunar(gYear, gMonth, gDay)
-            
-            // Determine if this day is in the current lunar month
-            val isThisMonth = dayLunar.lunarYear == lunarYear && dayLunar.lunarMonth == lunarMonth
-            
-            // Always use lunar day number (even for preview days from other months)
-            val dayValue = if (dayLunar.lunarDay > 0) dayLunar.lunarDay else gDay // Fallback to Gregorian if lunar conversion fails
-            
-            val gregorianDateTime = DateTime(gYear, gMonth, gDay, 0, 0)
-            val isToday = isToday(gregorianDateTime, gDay)
-            val dayCode = Formatter.getDayCodeFromDateTime(gregorianDateTime)
-            
+        // 1. Determine which lunisolar month the target Gregorian date falls into.
+        val lunarDate = LunisolarCalendar.gregorianToLunar(mTargetDate.year, mTargetDate.monthOfYear, mTargetDate.dayOfMonth)
+        if (lunarDate.lunarDay == 0) {
+            return getGregorianDays() // Fallback if date conversion fails
+        }
+
+        val lunarYear = lunarDate.lunarYear
+        val lunarMonth = lunarDate.lunarMonth
+
+        // 2. Find the start of that lunisolar month (the full moon).
+        val monthStartGregorian = LunisolarCalendar.lunarToGregorian(lunarYear, lunarMonth, 1) ?: return getGregorianDays()
+        val monthStartDateTime = DateTime(monthStartGregorian.first, monthStartGregorian.second, monthStartGregorian.third, 0, 0)
+
+        // The grid starts on the first day of the lunisolar month, not aligned to the week.
+        val gridStartDateTime = monthStartDateTime
+
+        val days = ArrayList<DayMonthly>()
+        for (i in 0 until DAYS_CNT) {
+            val currentDateTime = gridStartDateTime.plusDays(i)
+            val currentLunarDate = LunisolarCalendar.gregorianToLunar(currentDateTime.year, currentDateTime.monthOfYear, currentDateTime.dayOfMonth)
+
+            // 5. Determine if the day is part of the target lunisolar month.
+            val isThisMonth = currentLunarDate.lunarYear == lunarYear && currentLunarDate.lunarMonth == lunarMonth
+
+            val dayCode = Formatter.getDayCodeFromDateTime(currentDateTime)
+            val isToday = dayCode == mToday
+            val dayValue = currentLunarDate.lunarDay
+
             val day = DayMonthly(
                 value = dayValue,
                 isThisMonth = isThisMonth,
                 isToday = isToday,
                 code = dayCode,
-                weekOfYear = gregorianDateTime.weekOfWeekyear,
+                weekOfYear = currentDateTime.weekOfWeekyear,
                 dayEvents = ArrayList(),
                 indexOnMonthView = i,
-                isWeekend = context.isWeekendIndex(i % 7)
+                isWeekend = context.isWeekendIndex(context.getProperDayIndexInWeek(currentDateTime))
             )
             days.add(day)
         }
-        
         return days
     }
 
@@ -197,11 +183,11 @@ class MonthlyCalendarImpl(val callback: MonthlyCalendar, val context: Context) {
                     month
                 }
             } else {
-                var month = Formatter.getMonthName(context, mTargetDate.monthOfYear)
-                val targetYear = mTargetDate.toString(YEAR_PATTERN)
-                if (targetYear != DateTime().toString(YEAR_PATTERN)) {
-                    month += " $targetYear"
-                }
+            var month = Formatter.getMonthName(context, mTargetDate.monthOfYear)
+            val targetYear = mTargetDate.toString(YEAR_PATTERN)
+            if (targetYear != DateTime().toString(YEAR_PATTERN)) {
+                month += " $targetYear"
+            }
                 month
             }
         }

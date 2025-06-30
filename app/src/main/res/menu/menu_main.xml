@@ -24,31 +24,6 @@
         android:title="@string/refresh_caldav_calendars"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/go_to_date"
-        android:showAsAction="never"
-        android:title="@string/go_to_date"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/print"
-        android:showAsAction="never"
-        android:title="@string/print"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/add_holidays"
-        android:showAsAction="never"
-        android:title="@string/add_holidays"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/add_birthdays"
-        android:showAsAction="never"
-        android:title="@string/add_birthdays"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/add_anniversaries"
-        android:showAsAction="never"
-        android:title="@string/add_anniversaries"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_settings_cog_vector"
         android:title="@string/settings"
@@ -57,10 +32,5 @@
         android:id="@+id/about"
         android:icon="@drawable/ic_info_vector"
         android:title="@string/about"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/more_apps_from_us"
-        android:icon="@drawable/ic_google_play_vector"
-        android:title="@string/more_apps_from_us"
         app:showAsAction="ifRoom" />
 </menu>
