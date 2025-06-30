@@ -16,10 +16,10 @@ This application provides a visual calendar interface showing traditional lunar 
 ### Germanic Holidays & Traditions
 - **Four Major Holidays**: Yule, Sumarmal, Midsummer, Winter Nights
 - **Custom Holiday Names**: 3-day celebrations with meaningful day designations:
-  - **Yule**: YUL → LOG → ASH (Yule Night, Log Day, Ash Day)
-  - **Sumarmal**: SUM → BLT → FLD (Sumarmal, Blót Day, Field Day)
-  - **Midsummer**: MID → SUN → LIT (Midsummer, Sun Day, Light Day)
-  - **Winter Nights**: WIN → ANX → DIS (Winter Nights, Ancestor Day, Disablót)
+  - **Yule**
+  - **Sumarmal**
+  - **Midsummer**
+  - **Winter Nights**
 - **Seasonal Color Coding**: 
   - Yule: Red (winter)
   - Sumarmal: Green (spring)
@@ -41,7 +41,7 @@ This application provides a visual calendar interface showing traditional lunar 
 
 ### Astronomical Events
 - **Solstices & Equinoxes**: Visual indicators for seasonal transitions
-- **Moon Phase Tracking**: Accurate lunar phase calculations and display
+- **Moon Phase Tracking**: Accurate lunar phase calculations
 - **Metonic Cycle Integration**: 19-year cycle calculations for lunar calendar accuracy
 
 ## Building
@@ -116,11 +116,6 @@ The application includes extensive customization options:
 - **Grid Options**: Week number display, highlighting options
 - **Navigation**: Arrow buttons alongside swipe gestures
 
-### Data Management
-- **Event Backup**: Automatic and manual backup of calendar events
-- **Configuration Export**: Save and restore app settings
-- **CalDAV Sync**: Integration with external calendar services
-
 ## Technical Details
 
 ### Architecture
@@ -152,32 +147,3 @@ The original Simple Calendar Pro codebase is also licensed under GPL-3.0, allowi
 
 - **Simple Mobile Tools**: Original Simple Calendar Pro codebase foundation
 - **Jean Meeus**: "Astronomical Algorithms" for core calculations
-- **Android Community**: Material Design guidelines and best practices
-- **Germanic Historical Research**: Traditional calendar reconstruction sources
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
-
-### Development Setup
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly on multiple Android versions
-5. Submit a pull request
-
-### Areas for Contribution
-- **Localization**: Translation to additional languages
-- **Historical Accuracy**: Refinement of Germanic calendar traditions
-- **Astronomical Precision**: Enhanced celestial event calculations
-- **UI/UX**: Interface improvements and accessibility enhancements
-- **Performance**: Optimization for older Android devices
-
-## Roadmap
-
-- [ ] **Widget Support**: Home screen widgets for quick date reference
-- [ ] **Export Features**: ICS calendar file generation
-- [ ] **Advanced Settings**: More granular customization options
-- [ ] **Historical Dates**: Extended year range support
-- [ ] **Cultural Variants**: Support for other traditional calendar systems
-- [ ] **Tablet Optimization**: Enhanced large-screen layouts
