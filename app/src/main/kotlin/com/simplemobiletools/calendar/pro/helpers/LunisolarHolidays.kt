@@ -9,11 +9,17 @@ import org.joda.time.DateTime
  */
 object LunisolarHolidays {
 
+    enum class HolidayType {
+        MAJOR_HOLIDAY,
+        SOLSTICE_OR_EQUINOX
+    }
+
     data class Holiday(
         val name: String,
         val abbreviation: String,
         val startDate: DateTime,
-        val duration: Int = 3  // All holidays last 3 days
+        val duration: Int = 3,  // All holidays last 3 days
+        val type: HolidayType = HolidayType.MAJOR_HOLIDAY
     )
 
     /**
@@ -96,8 +102,6 @@ object LunisolarHolidays {
         return holidays
     }
 
-
-
     /**
      * Check if a date falls within any holiday period
      */
@@ -155,4 +159,37 @@ object LunisolarHolidays {
         val dayNumber = getHolidayDayNumber(date) ?: return null
         return "${holiday.abbreviation}$dayNumber"
     }
+
+    /**
+     * Get astronomical holidays (solstices/equinoxes) for a year
+     */
+    fun getAstronomicalEventsForYear(year: Int): List<Holiday> {
+        val events = mutableListOf<Holiday>()
+        
+        // Winter Solstice
+        val wsJD = LunisolarCalendar.calculateWinterSolstice(year)
+        val wsDate = DateTime(LunisolarCalendar.julianDayToGregorian(wsJD).toMillis())
+        events.add(Holiday("Winter Solstice", "WS", wsDate, 1, HolidayType.SOLSTICE_OR_EQUINOX))
+        
+        // Spring Equinox
+        val seJD = LunisolarCalendar.calculateSpringEquinox(year)
+        val seDate = DateTime(LunisolarCalendar.julianDayToGregorian(seJD).toMillis())
+        events.add(Holiday("Spring Equinox", "SE", seDate, 1, HolidayType.SOLSTICE_OR_EQUINOX))
+        
+        // Summer Solstice
+        val ssJD = LunisolarCalendar.calculateSummerSolstice(year)
+        val ssDate = DateTime(LunisolarCalendar.julianDayToGregorian(ssJD).toMillis())
+        events.add(Holiday("Summer Solstice", "SS", ssDate, 1, HolidayType.SOLSTICE_OR_EQUINOX))
+        
+        // Fall Equinox
+        val feJD = LunisolarCalendar.calculateFallEquinox(year)
+        val feDate = DateTime(LunisolarCalendar.julianDayToGregorian(feJD).toMillis())
+        events.add(Holiday("Fall Equinox", "FE", feDate, 1, HolidayType.SOLSTICE_OR_EQUINOX))
+        
+        return events
+    }
+}
+
+private fun Triple<Int, Int, Int>.toMillis(): Long {
+    return DateTime(this.first, this.second, this.third, 12, 0).millis
 } 

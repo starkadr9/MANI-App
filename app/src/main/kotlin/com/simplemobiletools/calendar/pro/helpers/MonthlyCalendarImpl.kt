@@ -103,8 +103,9 @@ class MonthlyCalendarImpl(val callback: MonthlyCalendar, val context: Context) {
         val monthStartGregorian = LunisolarCalendar.lunarToGregorian(lunarYear, lunarMonth, 1) ?: return getGregorianDays()
         val monthStartDateTime = DateTime(monthStartGregorian.first, monthStartGregorian.second, monthStartGregorian.third, 0, 0)
 
-        // The grid starts on the first day of the lunisolar month, not aligned to the week.
-        val gridStartDateTime = monthStartDateTime
+        // 4. Determine the start of the calendar grid. It should be the first day of the week (e.g., Sunday) of the week the month starts in.
+        val firstDayIndex = context.getProperDayIndexInWeek(monthStartDateTime)
+        val gridStartDateTime = monthStartDateTime.minusDays(firstDayIndex)
 
         val days = ArrayList<DayMonthly>()
         for (i in 0 until DAYS_CNT) {
@@ -116,7 +117,7 @@ class MonthlyCalendarImpl(val callback: MonthlyCalendar, val context: Context) {
 
             val dayCode = Formatter.getDayCodeFromDateTime(currentDateTime)
             val isToday = dayCode == mToday
-            val dayValue = currentLunarDate.lunarDay
+            val dayValue = if (isThisMonth) currentLunarDate.lunarDay else currentDateTime.dayOfMonth
 
             val day = DayMonthly(
                 value = dayValue,

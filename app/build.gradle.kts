@@ -10,7 +10,7 @@ plugins {
 }
 
 base {
-    archivesName.set("calendar")
+    archivesName.set("MANI")
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")

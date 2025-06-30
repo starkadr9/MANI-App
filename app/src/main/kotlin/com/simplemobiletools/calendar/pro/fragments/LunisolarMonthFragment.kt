@@ -14,6 +14,7 @@ import com.simplemobiletools.calendar.pro.activities.MainActivity
 import com.simplemobiletools.calendar.pro.helpers.Config
 import com.simplemobiletools.calendar.pro.helpers.Formatter
 import com.simplemobiletools.calendar.pro.helpers.LunisolarCalendar
+import com.simplemobiletools.calendar.pro.helpers.LunisolarHolidays
 import com.simplemobiletools.calendar.pro.helpers.MONTHLY_VIEW
 import com.simplemobiletools.calendar.pro.extensions.eventsHelper
 import com.simplemobiletools.calendar.pro.extensions.eventsDB
@@ -169,17 +170,42 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         val firstDayOfWeek = LunisolarCalendar.calculateWeekday(firstDayGregorian.first, firstDayGregorian.second, firstDayGregorian.third)
         val firstDayIndex = firstDayOfWeek.ordinal // 0=Sunday, 1=Monday, etc.
         
-        // Calculate grid size
-        val totalCells = monthLength + firstDayIndex
-        val weeksNeeded = (totalCells + 6) / 7 // Round up
-        val gridSize = weeksNeeded * 7
+        // Always use 42-day grid (6 weeks x 7 days)
+        val gridSize = 42
         
+        // Pre-fetch all holidays for the years to avoid repeated calculations
+        val currentYearHolidays = LunisolarHolidays.getHolidaysForYear(firstDayGregorian.first)
+        val prevYearHolidays = LunisolarHolidays.getHolidaysForYear(firstDayGregorian.first - 1)
+        val nextYearHolidays = LunisolarHolidays.getHolidaysForYear(firstDayGregorian.first + 1)
+        val allHolidays = currentYearHolidays + prevYearHolidays + nextYearHolidays
+        
+        val currentYearAstroEvents = LunisolarHolidays.getAstronomicalEventsForYear(firstDayGregorian.first)
+        val prevYearAstroEvents = LunisolarHolidays.getAstronomicalEventsForYear(firstDayGregorian.first - 1)
+        val nextYearAstroEvents = LunisolarHolidays.getAstronomicalEventsForYear(firstDayGregorian.first + 1)
+        val allAstroEvents = currentYearAstroEvents + prevYearAstroEvents + nextYearAstroEvents
+
+        // Calculate previous and next month data for preview
+        val (prevYear, prevMonth) = if (currentLunarMonth == 1) {
+            Pair(currentLunarYear - 1, LunisolarCalendar.getLunarMonthsInYear(currentLunarYear - 1))
+        } else {
+            Pair(currentLunarYear, currentLunarMonth - 1)
+        }
+        
+        val (nextYear, nextMonth) = if (currentLunarMonth == LunisolarCalendar.getLunarMonthsInYear(currentLunarYear)) {
+            Pair(currentLunarYear + 1, 1)
+        } else {
+            Pair(currentLunarYear, currentLunarMonth + 1)
+        }
+        
+        val prevMonthLength = LunisolarCalendar.getLunarMonthLength(prevYear, prevMonth)
+
         // Build grid week by week
         var currentWeek = LinearLayout(requireContext())
         currentWeek.orientation = LinearLayout.HORIZONTAL
         currentWeek.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1f
         )
         
         for (i in 0 until gridSize) {
@@ -189,11 +215,13 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 currentWeek.orientation = LinearLayout.HORIZONTAL
                 currentWeek.layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
                 )
             }
             
-            val dayView = createDayView(i, firstDayIndex, monthLength, firstDayJD)
+            val dayView = createDayView(i, firstDayIndex, monthLength, firstDayJD, allHolidays, allAstroEvents, 
+                                     prevYear, prevMonth, prevMonthLength, nextYear, nextMonth)
             currentWeek.addView(dayView)
         }
         
@@ -218,7 +246,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             headerView.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
             headerView.layoutParams = LinearLayout.LayoutParams(
                 0,
-                80, // Fixed height for headers
+                LinearLayout.LayoutParams.WRAP_CONTENT, 
                 1f
             )
             headerView.setPadding(4, 8, 4, 8)
@@ -235,189 +263,139 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         calendarGrid.addView(headerRow)
     }
     
-    private fun createDayView(cellIndex: Int, firstDayIndex: Int, monthLength: Int, firstDayJD: Double): TextView {
+    private fun createDayView(
+        cellIndex: Int,
+        firstDayIndex: Int,
+        monthLength: Int,
+        firstDayJD: Double,
+        holidays: List<LunisolarHolidays.Holiday>,
+        astroEvents: List<LunisolarHolidays.Holiday>,
+        prevYear: Int,
+        prevMonth: Int, 
+        prevMonthLength: Int,
+        nextYear: Int,
+        nextMonth: Int
+    ): TextView {
         val dayView = TextView(requireContext())
         dayView.layoutParams = LinearLayout.LayoutParams(
             0,
-            120, // Smaller height for better display
+            LinearLayout.LayoutParams.MATCH_PARENT,
             1f
         )
         dayView.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-        dayView.setPadding(2, 2, 2, 2)
+        dayView.setPadding(4, 8, 4, 8)
         dayView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
+        dayView.minHeight = 80 // Minimum height for event dots
         
         val textColor = requireContext().getProperTextColor()
         val backgroundColor = requireContext().getProperPrimaryColor()
         
-        if (cellIndex < firstDayIndex) {
-            // Previous month days
-            dayView.text = ""
-            dayView.alpha = 0.3f
-            dayView.setBackgroundColor(backgroundColor and 0x20FFFFFF.toInt()) // Very light version
-        } else if (cellIndex >= firstDayIndex + monthLength) {
-            // Next month days  
-            dayView.text = ""
-            dayView.alpha = 0.3f
-            dayView.setBackgroundColor(backgroundColor and 0x20FFFFFF.toInt()) // Very light version
-        } else {
-            // Current month days
-            val lunarDay = cellIndex - firstDayIndex + 1
-            dayView.alpha = 1.0f
-            dayView.setTextColor(textColor)
+        var gregorianDate: Triple<Int, Int, Int>? = null
+        var displayText = ""
+        var isCurrentMonth = false
+        var isToday = false
+        var lunarDay = 0
+        var holiday: LunisolarHolidays.Holiday? = null
+        var astroEvent: LunisolarHolidays.Holiday? = null
+        
+        when {
+            cellIndex < firstDayIndex -> {
+                // Previous month days
+                val prevDayNum = prevMonthLength - (firstDayIndex - cellIndex - 1)
+                displayText = prevDayNum.toString()
+                dayView.alpha = 0.4f
+                gregorianDate = LunisolarCalendar.lunarToGregorian(prevYear, prevMonth, prevDayNum)
+            }
+            cellIndex >= firstDayIndex + monthLength -> {
+                // Next month days
+                val nextDayNum = cellIndex - firstDayIndex - monthLength + 1
+                displayText = nextDayNum.toString()
+                dayView.alpha = 0.4f
+                gregorianDate = LunisolarCalendar.lunarToGregorian(nextYear, nextMonth, nextDayNum)
+            }
+            else -> {
+                // Current month days
+                lunarDay = cellIndex - firstDayIndex + 1
+                displayText = lunarDay.toString()
+                isCurrentMonth = true
+                dayView.alpha = 1.0f
+                gregorianDate = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, lunarDay)
+            }
+        }
+        
+        dayView.setTextColor(textColor)
+        
+        if (gregorianDate != null) {
+            val currentDate = DateTime(gregorianDate.first, gregorianDate.second, gregorianDate.third, 0, 0)
             
-            // Check if this is today
-            val gregorianDate = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, lunarDay)
-            val isToday = gregorianDate?.let { (year, month, day) ->
-                val today = DateTime.now()
-                year == today.year && month == today.monthOfYear && day == today.dayOfMonth
-            } ?: false
+            // Check if today
+            val today = DateTime.now()
+            isToday = gregorianDate.first == today.year && 
+                     gregorianDate.second == today.monthOfYear && 
+                     gregorianDate.third == today.dayOfMonth
             
-            // Add moon phase symbol at start of month (full moon)
-            if (lunarDay == 1) {
-                dayView.text = "🌕\n$lunarDay"
-                dayView.setBackgroundColor(0xFFE3F2FD.toInt()) // Light blue background
-            } else {
-                dayView.text = lunarDay.toString()
-                dayView.setBackgroundColor(backgroundColor and 0x10FFFFFF.toInt()) // Very light background
+            // Find holidays (check all 3 days for multi-day holidays)
+            holiday = holidays.find { holidayEvent ->
+                val day1 = holidayEvent.startDate.toLocalDate()
+                val day2 = holidayEvent.startDate.plusDays(1).toLocalDate()
+                val day3 = holidayEvent.startDate.plusDays(2).toLocalDate()
+                currentDate.toLocalDate() == day1 || currentDate.toLocalDate() == day2 || currentDate.toLocalDate() == day3
             }
             
-            // Highlight today with a special border/background
-            if (isToday) {
-                dayView.setBackgroundColor(requireContext().getProperPrimaryColor())
-                dayView.setTextColor(0xFFFFFFFF.toInt()) // White text for contrast
-                dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nTODAY" else "${lunarDay}\nTODAY"
-            }
+            // Find astronomical events
+            astroEvent = astroEvents.find { it.startDate.toLocalDate() == currentDate.toLocalDate() }
             
-            // Add holiday highlighting for major holidays (1st, 3rd, 6th, 9th months)
-            if (lunarDay <= 3 && !isToday) { // Don't override today highlighting
-                when (currentLunarMonth) {
-                    1 -> {
-                        dayView.setBackgroundColor(0xFF4CAF50.toInt()) // Green for Yule
-                        dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nYUL$lunarDay" else "${lunarDay}\nYUL$lunarDay"
-                        dayView.setTextColor(0xFFFFFFFF.toInt()) // White text
+            // Check for events using the event system
+            val dayCode = Formatter.getDayCodeFromDateTime(currentDate)
+            val hasEvents = false // TODO: Implement proper event checking integration with lunisolar calendar
+            
+            // Apply styling based on priority: today > holiday > astro event > normal
+            when {
+                isToday -> {
+                    dayView.setBackgroundColor(requireContext().getProperPrimaryColor())
+                    dayView.setTextColor(0xFFFFFFFF.toInt())
+                }
+                holiday != null -> {
+                    val holidayColor = when (holiday.abbreviation) {
+                        "YUL" -> 0xFF4CAF50.toInt() // Green for Yule
+                        "SUM" -> 0xFFFF9800.toInt() // Orange for Sumarmal  
+                        "MID" -> 0xFFFFEB3B.toInt() // Yellow for Midsummer
+                        "WIN" -> 0xFF3F51B5.toInt() // Blue for Winter Nights
+                        else -> 0xFFE91E63.toInt()  // Pink for other holidays
                     }
-                    3 -> {
-                        dayView.setBackgroundColor(0xFFFF9800.toInt()) // Orange for Sumarmal
-                        dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nSUM$lunarDay" else "${lunarDay}\nSUM$lunarDay"
-                        dayView.setTextColor(0xFFFFFFFF.toInt())
-                    }
-                    6 -> {
-                        dayView.setBackgroundColor(0xFFFFEB3B.toInt()) // Yellow for Midsummer
-                        dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nMID$lunarDay" else "${lunarDay}\nMID$lunarDay"
-                        dayView.setTextColor(0xFF000000.toInt()) // Black text
-                    }
-                    9 -> {
-                        dayView.setBackgroundColor(0xFF2196F3.toInt()) // Blue for Winter Nights
-                        dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nWIN$lunarDay" else "${lunarDay}\nWIN$lunarDay"
-                        dayView.setTextColor(0xFFFFFFFF.toInt())
-                    }
+                    dayView.setBackgroundColor(holidayColor)
+                    dayView.setTextColor(0xFFFFFFFF.toInt())
+                }
+                astroEvent != null -> {
+                    dayView.setBackgroundColor(0xFF9C27B0.toInt()) // Purple for astronomical events
+                    dayView.setTextColor(0xFFFFFFFF.toInt())
                 }
             }
             
-            // Add solstice/equinox highlighting (only if not today and not a holiday)
-            var isSolsticeEquinox = false
-            if (gregorianDate != null && !isToday && !(lunarDay <= 3 && listOf(1, 3, 6, 9).contains(currentLunarMonth))) {
-                val (year, month, day) = gregorianDate
-                val jd = LunisolarCalendar.gregorianToJulianDay(year, month, day)
-                val winterSolsticeJD = LunisolarCalendar.calculateWinterSolstice(year)
-                val springEquinoxJD = LunisolarCalendar.calculateSpringEquinox(year)
-                val summerSolsticeJD = LunisolarCalendar.calculateSummerSolstice(year)
-                val fallEquinoxJD = LunisolarCalendar.calculateFallEquinox(year)
-                
-                when {
-                    kotlin.math.abs(jd - winterSolsticeJD) < 0.5 -> {
-                        dayView.setBackgroundColor(0xFF4CAF50.toInt()) // Green for winter solstice
-                        dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nWS" else "${lunarDay}\nWS"
-                        dayView.setTextColor(0xFFFFFFFF.toInt())
-                        isSolsticeEquinox = true
-                    }
-                    kotlin.math.abs(jd - springEquinoxJD) < 0.5 -> {
-                        dayView.setBackgroundColor(0xFF9C27B0.toInt()) // Purple for spring equinox
-                        dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nSE" else "${lunarDay}\nSE"
-                        dayView.setTextColor(0xFFFFFFFF.toInt())
-                        isSolsticeEquinox = true
-                    }
-                    kotlin.math.abs(jd - summerSolsticeJD) < 0.5 -> {
-                        dayView.setBackgroundColor(0xFFFF9800.toInt()) // Orange for summer solstice
-                        dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nSS" else "${lunarDay}\nSS"
-                        dayView.setTextColor(0xFFFFFFFF.toInt())
-                        isSolsticeEquinox = true
-                    }
-                    kotlin.math.abs(jd - fallEquinoxJD) < 0.5 -> {
-                        dayView.setBackgroundColor(0xFF795548.toInt()) // Brown for fall equinox
-                        dayView.text = if (lunarDay == 1) "🌕\n${lunarDay}\nFE" else "${lunarDay}\nFE"
-                        dayView.setTextColor(0xFFFFFFFF.toInt())
-                        isSolsticeEquinox = true
-                    }
-                }
+            // Create compound text with day number, holiday info, and event indicator
+            var fullText = displayText
+            
+            // Add holiday identifier if present
+            if (holiday != null) {
+                val holidayDayNumber = LunisolarHolidays.getHolidayDayNumber(currentDate) ?: 1
+                fullText += "\n${holiday.abbreviation}$holidayDayNumber"
             }
             
-            // Check for events on this day
-            var hasEvents = false
-            if (gregorianDate != null) {
-                val (year, month, day) = gregorianDate
-                // Create start and end timestamps for the day
-                val dayStart = DateTime(year, month, day, 0, 0, 0).millis / 1000
-                val dayEnd = DateTime(year, month, day, 23, 59, 59).millis / 1000
-                
-                // Check for events using direct database query (synchronous)
-                try {
-                    val eventsDB = requireContext().eventsDB
-                    val events = eventsDB.getOneTimeEventsOrTasksFromTo(dayStart, dayEnd)
-                    hasEvents = events.isNotEmpty()
-                } catch (e: Exception) {
-                    // Ignore errors
-                }
+            // Add astronomical event identifier if present  
+            if (astroEvent != null) {
+                fullText += "\n${astroEvent.abbreviation}"
             }
             
-            // Add click functionality to navigate to day view
-            dayView.setOnClickListener {
-                val gregorianDate = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, lunarDay)
-                if (gregorianDate != null) {
-                    val (year, month, day) = gregorianDate
-                    // Debug logging
-                    android.util.Log.d("LunisolarClick", "Clicked lunar day $lunarDay in month $currentLunarMonth year $currentLunarYear")
-                    android.util.Log.d("LunisolarClick", "Converted to Gregorian: $year-$month-$day")
-                    
-                    // Let's also check what the month start should be
-                    val monthStart = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, 1)
-                    if (monthStart != null) {
-                        android.util.Log.d("LunisolarClick", "Month $currentLunarMonth day 1 should be: ${monthStart.first}-${monthStart.second}-${monthStart.third}")
-                    }
-                    
-                    // Switch to daily view for the selected day using the correct function
-                    val mainActivity = activity as? MainActivity
-                    mainActivity?.let { mainActivity ->
-                        val dateTime = DateTime(year, month, day, 0, 0)
-                        val timestamp = dateTime.millis
-                        android.util.Log.d("LunisolarClick", "Opening day with timestamp: $timestamp")
-                        mainActivity.openDayAt(timestamp)
-                    }
-                }
-            }
-            
-            // Add event dot indicator if this day has events (after all other formatting)
+            // Add event dot indicator if has events
             if (hasEvents) {
-                // Add dot to the text, regardless of what type of day it is
-                val currentText = dayView.text.toString()
-                if (!currentText.contains("•")) {
-                    dayView.text = "$currentText •"
-                }
+                fullText += "\n●" // Add dot indicator for events
             }
             
-            // Add border using theme colors (only if not a special day)
-            if (!isSolsticeEquinox && !isToday && !(lunarDay <= 3 && listOf(1, 3, 6, 9).contains(currentLunarMonth))) {
-                val bgColor = if (lunarDay == 1) 0xFFE3F2FD.toInt() else backgroundColor and 0x10FFFFFF.toInt()
-                
-                dayView.background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(bgColor)
-                    setStroke(1, textColor and 0x40FFFFFF.toInt()) // Semi-transparent border
-                }
-            }
+            dayView.text = fullText
+        } else {
+            dayView.text = displayText
         }
         
         return dayView
     }
-    
-
 } 

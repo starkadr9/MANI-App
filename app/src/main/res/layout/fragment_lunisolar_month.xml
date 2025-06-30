@@ -62,13 +62,13 @@
 
     </LinearLayout>
 
-    <!-- Calendar Grid Container -->
     <LinearLayout
         android:id="@+id/calendar_grid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:background="?android:attr/colorBackground" />
+        android:padding="4dp"
+        android:gravity="center" />
 
 </LinearLayout> 
