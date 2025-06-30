@@ -1017,44 +1017,18 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
                 }
                 
                 // PRAXIS section
-                R.id.nav_praxis_name1 -> {
-                    showPlaceholderActivity("PRAXIS - Name1")
+                R.id.nav_praxis_beginners_guide -> {
+                    val intent = Intent(this, PoeticEddaActivity::class.java)
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TEXT_FILE, "praxis_beginners_guide.txt")
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TITLE, "Beginners Guide")
+                    startActivity(intent)
                     true
                 }
-                R.id.nav_praxis_name2 -> {
-                    showPlaceholderActivity("PRAXIS - Name2")
-                    true
-                }
-                R.id.nav_praxis_name3 -> {
-                    showPlaceholderActivity("PRAXIS - Name3")
-                    true
-                }
-                R.id.nav_praxis_name4 -> {
-                    showPlaceholderActivity("PRAXIS - Name4")
-                    true
-                }
-                R.id.nav_praxis_name5 -> {
-                    showPlaceholderActivity("PRAXIS - Name5")
-                    true
-                }
-                R.id.nav_praxis_name6 -> {
-                    showPlaceholderActivity("PRAXIS - Name6")
-                    true
-                }
-                R.id.nav_praxis_name7 -> {
-                    showPlaceholderActivity("PRAXIS - Name7")
-                    true
-                }
-                R.id.nav_praxis_name8 -> {
-                    showPlaceholderActivity("PRAXIS - Name8")
-                    true
-                }
-                R.id.nav_praxis_name9 -> {
-                    showPlaceholderActivity("PRAXIS - Name9")
-                    true
-                }
-                R.id.nav_praxis_name10 -> {
-                    showPlaceholderActivity("PRAXIS - Name10")
+                R.id.nav_praxis_wight_listing -> {
+                    val intent = Intent(this, PoeticEddaActivity::class.java)
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TEXT_FILE, "praxis_wight_listing.txt")
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TITLE, "Wight Listing")
+                    startActivity(intent)
                     true
                 }
                 

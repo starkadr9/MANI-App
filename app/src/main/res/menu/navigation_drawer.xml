@@ -10,35 +10,11 @@
     <item android:title="PRAXIS">
         <menu>
             <item
-                android:id="@+id/nav_praxis_name1"
-                android:title="Name1" />
+                android:id="@+id/nav_praxis_beginners_guide"
+                android:title="Beginners Guide" />
             <item
-                android:id="@+id/nav_praxis_name2"
-                android:title="Name2" />
-            <item
-                android:id="@+id/nav_praxis_name3"
-                android:title="Name3" />
-            <item
-                android:id="@+id/nav_praxis_name4"
-                android:title="Name4" />
-            <item
-                android:id="@+id/nav_praxis_name5"
-                android:title="Name5" />
-            <item
-                android:id="@+id/nav_praxis_name6"
-                android:title="Name6" />
-            <item
-                android:id="@+id/nav_praxis_name7"
-                android:title="Name7" />
-            <item
-                android:id="@+id/nav_praxis_name8"
-                android:title="Name8" />
-            <item
-                android:id="@+id/nav_praxis_name9"
-                android:title="Name9" />
-            <item
-                android:id="@+id/nav_praxis_name10"
-                android:title="Name10" />
+                android:id="@+id/nav_praxis_wight_listing"
+                android:title="Wight Listing" />
         </menu>
     </item>
 
