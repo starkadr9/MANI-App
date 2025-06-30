@@ -1,5 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Empty placeholder navigation drawer -->
-    <!-- Add future menu items here -->
+    <!-- PRAXIS Section -->
+    <item android:title="PRAXIS">
+        <menu>
+            <item
+                android:id="@+id/nav_praxis_name1"
+                android:title="Name1" />
+            <item
+                android:id="@+id/nav_praxis_name2"
+                android:title="Name2" />
+            <item
+                android:id="@+id/nav_praxis_name3"
+                android:title="Name3" />
+            <item
+                android:id="@+id/nav_praxis_name4"
+                android:title="Name4" />
+            <item
+                android:id="@+id/nav_praxis_name5"
+                android:title="Name5" />
+            <item
+                android:id="@+id/nav_praxis_name6"
+                android:title="Name6" />
+            <item
+                android:id="@+id/nav_praxis_name7"
+                android:title="Name7" />
+            <item
+                android:id="@+id/nav_praxis_name8"
+                android:title="Name8" />
+            <item
+                android:id="@+id/nav_praxis_name9"
+                android:title="Name9" />
+            <item
+                android:id="@+id/nav_praxis_name10"
+                android:title="Name10" />
+        </menu>
+    </item>
+
+    <!-- HOLIDAYS Section -->
+    <item android:title="HOLIDAYS">
+        <menu>
+            <item
+                android:id="@+id/nav_yule"
+                android:title="Yule" />
+            <item
+                android:id="@+id/nav_summermal"
+                android:title="Summermal" />
+            <item
+                android:id="@+id/nav_midsummer"
+                android:title="Midsummer" />
+            <item
+                android:id="@+id/nav_winter_nights"
+                android:title="Winter Nights" />
+        </menu>
+    </item>
+
+    <!-- LORE Section -->
+    <item android:title="LORE">
+        <menu>
+            <item
+                android:id="@+id/nav_lore_poetic_edda"
+                android:title="Poetic Edda" />
+        </menu>
+    </item>
 </menu> 

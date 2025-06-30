@@ -182,6 +182,25 @@
             android:exported="false"
             android:theme="@style/Theme.Transparent" />
 
+        <activity
+            android:name=".activities.PlaceholderActivity"
+            android:configChanges="orientation"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity" />
+
+        <activity
+            android:name=".activities.PoeticEddaActivity"
+            android:configChanges="orientation"
+            android:exported="false"
+            android:label="@string/poetic_edda"
+            android:parentActivityName=".activities.MainActivity" />
+
+        <activity
+            android:name=".activities.TextViewerActivity"
+            android:configChanges="orientation"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity" />
+
         <service android:name=".services.SnoozeService" />
         <service android:name=".services.MarkCompletedService" />
 

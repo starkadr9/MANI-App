@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_margin"
+    android:background="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/chapter_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/bigger_text_size"
+                android:textStyle="bold"
+                tools:text="Völuspá" />
+
+            <TextView
+                android:id="@+id/chapter_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textSize="@dimen/normal_text_size"
+                android:alpha="0.7"
+                tools:text="The Prophecy of the Seeress" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/expand_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="@dimen/small_margin"
+            android:src="@drawable/ic_chevron_right_vector"
+            android:rotation="90"
+            android:contentDescription="@string/expand" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/chapter_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_margin"
+        android:textSize="@dimen/normal_text_size"
+        android:lineSpacingExtra="4dp"
+        android:visibility="gone"
+        tools:text="Sample chapter content would go here..."
+        tools:visibility="visible" />
+
+</LinearLayout> 

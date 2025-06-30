@@ -23,6 +23,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import com.simplemobiletools.calendar.pro.BuildConfig
 import com.simplemobiletools.calendar.pro.R
+import com.simplemobiletools.calendar.pro.activities.PoeticEddaActivity
 import com.simplemobiletools.calendar.pro.adapters.EventListAdapter
 import com.simplemobiletools.calendar.pro.adapters.QuickFilterEventTypeAdapter
 import com.simplemobiletools.calendar.pro.databases.EventsDatabase
@@ -1010,11 +1011,98 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        // Navigation drawer is currently empty - placeholder for future functionality
         binding.navView.setNavigationItemSelectedListener { menuItem ->
-            // Handle future menu items here
+            when (menuItem.itemId) {
+                // PRAXIS section
+                R.id.nav_praxis_name1 -> {
+                    showPlaceholderActivity("PRAXIS - Name1")
+                    true
+                }
+                R.id.nav_praxis_name2 -> {
+                    showPlaceholderActivity("PRAXIS - Name2")
+                    true
+                }
+                R.id.nav_praxis_name3 -> {
+                    showPlaceholderActivity("PRAXIS - Name3")
+                    true
+                }
+                R.id.nav_praxis_name4 -> {
+                    showPlaceholderActivity("PRAXIS - Name4")
+                    true
+                }
+                R.id.nav_praxis_name5 -> {
+                    showPlaceholderActivity("PRAXIS - Name5")
+                    true
+                }
+                R.id.nav_praxis_name6 -> {
+                    showPlaceholderActivity("PRAXIS - Name6")
+                    true
+                }
+                R.id.nav_praxis_name7 -> {
+                    showPlaceholderActivity("PRAXIS - Name7")
+                    true
+                }
+                R.id.nav_praxis_name8 -> {
+                    showPlaceholderActivity("PRAXIS - Name8")
+                    true
+                }
+                R.id.nav_praxis_name9 -> {
+                    showPlaceholderActivity("PRAXIS - Name9")
+                    true
+                }
+                R.id.nav_praxis_name10 -> {
+                    showPlaceholderActivity("PRAXIS - Name10")
+                    true
+                }
+                
+                // HOLIDAYS section - Seasonal Groups
+                R.id.nav_yule -> {
+                    val intent = Intent(this, PoeticEddaActivity::class.java)
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TEXT_FILE, "yule_combined.txt")
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TITLE, "Yule")
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_summermal -> {
+                    val intent = Intent(this, PoeticEddaActivity::class.java)
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TEXT_FILE, "summermal_combined.txt")
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TITLE, "Summermal")
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_midsummer -> {
+                    val intent = Intent(this, PoeticEddaActivity::class.java)
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TEXT_FILE, "midsummer_combined.txt")
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TITLE, "Midsummer")
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_winter_nights -> {
+                    val intent = Intent(this, PoeticEddaActivity::class.java)
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TEXT_FILE, "winternights_combined.txt")
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TITLE, "Winter Nights")
+                    startActivity(intent)
+                    true
+                }
+                
+                // LORE section
+                R.id.nav_lore_poetic_edda -> {
+                    startActivity(Intent(this, PoeticEddaActivity::class.java))
+                    true
+                }
+                
+                else -> false
+            }
             binding.drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
     }
+    
+    private fun showPlaceholderActivity(title: String) {
+        val intent = Intent(this, PlaceholderActivity::class.java)
+        intent.putExtra("title", title)
+        startActivity(intent)
+    }
+    
+
 }

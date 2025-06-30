@@ -133,11 +133,16 @@
     <!-- Time zones -->
     <string name="enter_a_country">Enter a country or time zone</string>
 
+    <!-- Navigation drawer and other UI -->
+    <string name="expand">Expand</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="search">Search</string>
+
     <!-- Export / Import -->
     <string name="import_events">Import events</string>
     <string name="export_events">Export events</string>
     <string name="import_events_from_ics">Import events from an .ics file</string>
-    <string name="import_events_from_ics_pro">Import events from an .ics file (Pro)</string>
+    <string name="import_events_from_ics_pro">Import events from an .ics file</string>
     <string name="export_events_to_ics">Export events to an .ics file</string>
     <string name="default_event_type">Default event type</string>
     <string name="export_past_events_too">Export past events too</string>
@@ -306,6 +311,7 @@
     <!-- Navigation Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="poetic_edda">Poetic Edda</string>
     
     <!--
         Haven't found some strings? There's more at
