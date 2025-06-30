@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Settings at the top -->
+    <item
+        android:id="@+id/nav_settings"
+        android:title="@string/settings" />
+
     <!-- PRAXIS Section -->
     <item android:title="PRAXIS">
         <menu>

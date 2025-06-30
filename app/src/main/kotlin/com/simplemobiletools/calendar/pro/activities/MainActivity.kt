@@ -63,6 +63,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     private var mShouldFilterBeVisible = false
     private var mLatestSearchQuery = ""
     private var currentFragments = ArrayList<MyFragmentHolder>()
+    private var isSearchOpen = false
 
     private var mStoredTextColor = 0
     private var mStoredBackgroundColor = 0
@@ -196,7 +197,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
         updateStatusbarColor(getProperBackgroundColor())
         binding.apply {
-            mainMenu.updateColors()
+            mainToolbar.setBackgroundColor(getProperPrimaryColor())
             storeStateVariables()
             updateTextColors(calendarCoordinator)
             fabExtendedOverlay.background = ColorDrawable(getProperBackgroundColor().adjustAlpha(0.8f))
@@ -210,7 +211,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             checkSwipeRefreshAvailability()
             checkShortcuts()
 
-            if (!mainMenu.isSearchOpen) {
+            if (!isSearchOpen) {
                 refreshMenuItems()
             }
         }
@@ -240,42 +241,26 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             hideExtendedFab()
         }
 
-        binding.mainMenu.getToolbar().menu.apply {
-            findItem(R.id.filter).isVisible = mShouldFilterBeVisible
-            findItem(R.id.refresh_caldav_calendars).isVisible = config.caldavSync
+        binding.mainToolbar.menu.apply {
+            findItem(R.id.filter)?.isVisible = mShouldFilterBeVisible
+            findItem(R.id.refresh_caldav_calendars)?.isVisible = config.caldavSync
         }
     }
 
     private fun setupOptionsMenu() = binding.apply {
-        mainMenu.getToolbar().inflateMenu(R.menu.menu_main)
-        mainMenu.toggleHideOnScroll(false)
-        mainMenu.setupMenu()
+        // Set up main toolbar
+        setSupportActionBar(mainToolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
 
-        mainMenu.onSearchTextChangedListener = { text ->
-            searchQueryChanged(text)
-        }
-
-        mainMenu.getToolbar().setOnMenuItemClickListener { menuItem ->
-            if (binding.fabExtendedOverlay.isVisible()) {
-                hideExtendedFab()
-            }
-
-            when (menuItem.itemId) {
-                R.id.change_view -> showViewDialog()
-                R.id.filter -> showFilterDialog()
-                R.id.refresh_caldav_calendars -> refreshCalDAVCalendars(true)
-                R.id.settings -> launchSettings()
-                else -> return@setOnMenuItemClickListener false
-            }
-            return@setOnMenuItemClickListener true
-        }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main_toolbar, menu)
+        return true
     }
 
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
-        } else if (binding.mainMenu.isSearchOpen) {
-            closeSearch()
         } else {
             binding.swipeRefreshLayout.isRefreshing = false
             checkSwipeRefreshAvailability()
@@ -284,6 +269,28 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
                 currentFragments.size > 1 -> removeTopFragment()
                 else -> super.onBackPressed()
             }
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (binding.fabExtendedOverlay.isVisible()) {
+            hideExtendedFab()
+        }
+
+        return when (item.itemId) {
+            android.R.id.home -> {
+                if (currentFragments.size > 1) {
+                    onBackPressed()
+                    true
+                } else {
+                    false
+                }
+            }
+            R.id.change_view -> {
+                showViewDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -325,13 +332,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         }
     }
 
-    private fun closeSearch() {
-        binding.mainMenu.closeSearch()
-        minFetchedSearchTS = 0L
-        maxFetchedSearchTS = 0L
-        searchResultEvents.clear()
-        bottomItemAtRefresh = null
-    }
+    // Search functionality simplified - closeSearch() method removed
 
     private fun checkCalDAVUpdateListener() {
         if (isNougatPlus()) {
@@ -486,7 +487,6 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
         RadioGroupDialog(this, items, config.storedView) {
             resetActionBarTitle()
-            closeSearch()
             updateView(it as Int)
             refreshMenuItems()
         }
@@ -501,7 +501,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     }
 
     private fun resetActionBarTitle() {
-        binding.mainMenu.updateHintText(getString(com.simplemobiletools.commons.R.string.search))
+        binding.mainToolbar.title = getString(R.string.app_launcher_name)
     }
 
     private fun showFilterDialog() {
@@ -610,7 +610,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
         fragment.arguments = bundle
         supportFragmentManager.beginTransaction().add(R.id.fragments_holder, fragment).commitNow()
-        binding.mainMenu.toggleForceArrowBackIcon(false)
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
     private fun fixDayCode(dayCode: String? = null): String? = when {
@@ -721,15 +721,12 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         if (currentFragments.size > 1) {
             showBackNavigationArrow()
         } else {
-            binding.mainMenu.toggleForceArrowBackIcon(false)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }
     }
 
     private fun showBackNavigationArrow() {
-        binding.mainMenu.toggleForceArrowBackIcon(true)
-        binding.mainMenu.onNavigateBackClickListener = {
-            onBackPressed()
-        }
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun refreshViewPager() {
@@ -800,7 +797,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     }
 
     private fun showSearchResultEvents(events: ArrayList<Event>, updateStatus: Int) {
-        val currentSearchQuery = binding.mainMenu.getCurrentQuery()
+        val currentSearchQuery = mLatestSearchQuery
         val filtered = try {
             events.filter {
                 it.title.contains(currentSearchQuery, true) || it.location.contains(currentSearchQuery, true) || it.description.contains(
@@ -1005,7 +1002,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
     private fun setupNavigationDrawer() {
         val toggle = ActionBarDrawerToggle(
-            this, binding.drawerLayout, binding.mainMenu.getToolbar(),
+            this, binding.drawerLayout, binding.mainToolbar,
             R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
         binding.drawerLayout.addDrawerListener(toggle)
@@ -1013,6 +1010,12 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
         binding.navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
+                // Settings at the top
+                R.id.nav_settings -> {
+                    launchSettings()
+                    true
+                }
+                
                 // PRAXIS section
                 R.id.nav_praxis_name1 -> {
                     showPlaceholderActivity("PRAXIS - Name1")
