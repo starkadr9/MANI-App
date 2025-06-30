@@ -2,6 +2,10 @@ package com.simplemobiletools.calendar.pro.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,10 +22,13 @@ import com.simplemobiletools.calendar.pro.helpers.LunisolarHolidays
 import com.simplemobiletools.calendar.pro.helpers.MONTHLY_VIEW
 import com.simplemobiletools.calendar.pro.extensions.eventsHelper
 import com.simplemobiletools.calendar.pro.extensions.eventsDB
+import com.simplemobiletools.calendar.pro.models.Event
 import com.simplemobiletools.commons.extensions.applyColorFilter
 import com.simplemobiletools.commons.extensions.getProperPrimaryColor
 import com.simplemobiletools.commons.extensions.getProperTextColor
+import com.simplemobiletools.commons.helpers.ensureBackgroundThread
 import org.joda.time.DateTime
+import java.util.HashMap
 
 class LunisolarMonthFragment : MyFragmentHolder() {
     override val viewType = MONTHLY_VIEW
@@ -35,6 +42,10 @@ class LunisolarMonthFragment : MyFragmentHolder() {
     private lateinit var todayButton: TextView
     private lateinit var calendarGrid: LinearLayout
     
+    // Event caching for performance
+    private var dayEvents = HashMap<String, ArrayList<Event>>()
+    private var eventsLoaded = false
+    
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lunisolar_month, container, false)
         
@@ -46,7 +57,6 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         
         // Apply theme colors
         val textColor = requireContext().getProperTextColor()
-        val primaryColor = requireContext().getProperPrimaryColor()
         
         monthTitle.setTextColor(textColor)
         todayButton.setTextColor(textColor)
@@ -65,22 +75,24 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             android.util.Log.d("LunisolarDebug", debug)
         }
         
-        updateDisplay()
+        loadEventsAndUpdateDisplay()
         return view
     }
     
     override fun onResume() {
         super.onResume()
-        // Refresh display in case settings changed
-        updateDisplay()
+        // Refresh events and display when returning to fragment
+        loadEventsAndUpdateDisplay()
     }
     
     // Required by MyFragmentHolder
     override fun shouldGoToTodayBeVisible() = true
-    override fun refreshEvents() {}
+    override fun refreshEvents() {
+        loadEventsAndUpdateDisplay()
+    }
     override fun goToToday() {
         initializeCurrentMonth()
-        updateDisplay()
+        loadEventsAndUpdateDisplay()
     }
     override fun showGoToDateDialog() {}
     override fun getNewEventDayCode(): String {
@@ -114,7 +126,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             currentLunarYear--
             currentLunarMonth = LunisolarCalendar.getLunarMonthsInYear(currentLunarYear)
         }
-        updateDisplay()
+        loadEventsAndUpdateDisplay()
     }
     
     private fun navigateToNextMonth() {
@@ -124,7 +136,48 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             currentLunarYear++
             currentLunarMonth = 1
         }
-        updateDisplay()
+        loadEventsAndUpdateDisplay()
+    }
+    
+    private fun loadEventsAndUpdateDisplay() {
+        // Calculate time range for events (include prev/next month for 42-day grid)
+        val firstDayGregorian = LunisolarCalendar.lunarToGregorian(currentLunarYear, currentLunarMonth, 1)
+        if (firstDayGregorian == null) {
+            updateDisplay()
+            return
+        }
+        
+        val startDateTime = DateTime(firstDayGregorian.first, firstDayGregorian.second, firstDayGregorian.third, 0, 0).minusDays(7)
+        val endDateTime = startDateTime.plusDays(50) // Extra buffer for 42-day grid
+        
+        ensureBackgroundThread {
+            requireContext().eventsHelper.getEvents(startDateTime.millis / 1000, endDateTime.millis / 1000) { events ->
+                // Cache events by day code
+                dayEvents.clear()
+                events.forEach { event ->
+                    val startCode = Formatter.getDayCodeFromTS(event.startTS)
+                    val endCode = Formatter.getDayCodeFromTS(event.endTS)
+                    
+                    // Handle multi-day events
+                    var currentDate = Formatter.getDateTimeFromCode(startCode)
+                    val endDate = Formatter.getDateTimeFromCode(endCode)
+                    
+                    while (currentDate <= endDate) {
+                        val dayCode = Formatter.getDayCodeFromDateTime(currentDate)
+                        if (dayEvents[dayCode] == null) {
+                            dayEvents[dayCode] = ArrayList()
+                        }
+                        dayEvents[dayCode]!!.add(event)
+                        currentDate = currentDate.plusDays(1)
+                    }
+                }
+                
+                eventsLoaded = true
+                activity?.runOnUiThread {
+                    updateDisplay()
+                }
+            }
+        }
     }
     
     private fun updateDisplay() {
@@ -166,7 +219,6 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         
         if (firstDayGregorian == null) return
         
-        val firstDayJD = LunisolarCalendar.gregorianToJulianDay(firstDayGregorian.first, firstDayGregorian.second, firstDayGregorian.third)
         val firstDayOfWeek = LunisolarCalendar.calculateWeekday(firstDayGregorian.first, firstDayGregorian.second, firstDayGregorian.third)
         val firstDayIndex = firstDayOfWeek.ordinal // 0=Sunday, 1=Monday, etc.
         
@@ -220,7 +272,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 )
             }
             
-            val dayView = createDayView(i, firstDayIndex, monthLength, firstDayJD, allHolidays, allAstroEvents, 
+            val dayView = createDayView(i, firstDayIndex, monthLength, allHolidays, allAstroEvents, 
                                      prevYear, prevMonth, prevMonthLength, nextYear, nextMonth)
             currentWeek.addView(dayView)
         }
@@ -267,7 +319,6 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         cellIndex: Int,
         firstDayIndex: Int,
         monthLength: Int,
-        firstDayJD: Double,
         holidays: List<LunisolarHolidays.Holiday>,
         astroEvents: List<LunisolarHolidays.Holiday>,
         prevYear: Int,
@@ -288,7 +339,6 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         dayView.minHeight = 80 // Minimum height for event dots
         
         val textColor = requireContext().getProperTextColor()
-        val backgroundColor = requireContext().getProperPrimaryColor()
         
         var gregorianDate: Triple<Int, Int, Int>? = null
         var displayText = ""
@@ -345,9 +395,10 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             // Find astronomical events
             astroEvent = astroEvents.find { it.startDate.toLocalDate() == currentDate.toLocalDate() }
             
-            // Check for events using the event system
+            // Check for events using cached event data
             val dayCode = Formatter.getDayCodeFromDateTime(currentDate)
-            val hasEvents = false // TODO: Implement proper event checking integration with lunisolar calendar
+            val hasEvents = eventsLoaded && dayEvents[dayCode]?.isNotEmpty() == true
+            val eventCount = dayEvents[dayCode]?.size ?: 0
             
             // Apply styling based on priority: today > holiday > astro event > normal
             when {
@@ -377,8 +428,10 @@ class LunisolarMonthFragment : MyFragmentHolder() {
             
             // Add holiday identifier if present
             if (holiday != null) {
-                val holidayDayNumber = LunisolarHolidays.getHolidayDayNumber(currentDate) ?: 1
-                fullText += "\n${holiday.abbreviation}$holidayDayNumber"
+                val holidayInfo = LunisolarHolidays.getHolidayDisplayInfo(currentDate)
+                if (holidayInfo != null) {
+                    fullText += "\n$holidayInfo"
+                }
             }
             
             // Add astronomical event identifier if present  
@@ -386,16 +439,71 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 fullText += "\n${astroEvent.abbreviation}"
             }
             
-            // Add event dot indicator if has events
+            // Add event indicators - use multiple dots for multiple events, always visible
             if (hasEvents) {
-                fullText += "\n●" // Add dot indicator for events
+                val eventIndicator = when {
+                    eventCount == 1 -> "●"
+                    eventCount == 2 -> "●●" 
+                    eventCount >= 3 -> "●●●"
+                    else -> ""
+                }
+                fullText += "\n$eventIndicator"
             }
             
             dayView.text = fullText
+            
+            // Apply contrasting text color for event indicators
+            if (hasEvents && fullText.contains("●")) {
+                // Make the entire text use contrasting colors for visibility
+                val contrastColor = when {
+                    isToday -> 0xFFFFFF00.toInt() // Yellow on today's background
+                    holiday != null -> 0xFFFFFFFF.toInt() // White on holiday backgrounds
+                    astroEvent != null -> 0xFFFFFFFF.toInt() // White on astro event backgrounds  
+                    else -> 0xFF000000.toInt() // Black on normal backgrounds
+                }
+                
+                // Create a spannable string to color just the event dots
+                val spannableText = SpannableString(fullText)
+                val eventStart = fullText.lastIndexOf("●")
+                if (eventStart != -1) {
+                    val eventEnd = fullText.length
+                    spannableText.setSpan(
+                        ForegroundColorSpan(contrastColor),
+                        eventStart,
+                        eventEnd,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    spannableText.setSpan(
+                        StyleSpan(android.graphics.Typeface.BOLD),
+                        eventStart,
+                        eventEnd,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    dayView.text = spannableText
+                }
+            }
+            
+            // Make day clickable to show events
+            dayView.setOnClickListener {
+                if (hasEvents) {
+                    showEventsForDay(dayCode, currentDate)
+                }
+            }
         } else {
             dayView.text = displayText
         }
         
         return dayView
+    }
+    
+    private fun showEventsForDay(dayCode: String, date: DateTime) {
+        val events = dayEvents[dayCode] ?: return
+        
+        // Launch the default day view to show events
+        // This integrates with the existing event system
+        val intent = Intent(requireContext(), MainActivity::class.java)
+        intent.putExtra("day_code", dayCode)
+        intent.putExtra("view_to_open", 5) // DAILY_VIEW
+        startActivity(intent)
     }
 } 

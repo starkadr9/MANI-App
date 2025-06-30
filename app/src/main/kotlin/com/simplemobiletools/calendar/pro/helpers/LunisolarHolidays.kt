@@ -152,12 +152,39 @@ object LunisolarHolidays {
     }
 
     /**
-     * Get holiday information for display purposes
+     * Get holiday information for display purposes with custom day names
      */
     fun getHolidayDisplayInfo(date: DateTime): String? {
         val holiday = getHolidayForDate(date) ?: return null
         val dayNumber = getHolidayDayNumber(date) ?: return null
-        return "${holiday.abbreviation}$dayNumber"
+        
+        return when (holiday.abbreviation) {
+            "YUL" -> when (dayNumber) {
+                1 -> "YUL" // Yule Night
+                2 -> "LOG" // Log Day  
+                3 -> "ASH" // Ash Day
+                else -> "${holiday.abbreviation}$dayNumber"
+            }
+            "SUM" -> when (dayNumber) {
+                1 -> "SUM" // Sumarmal
+                2 -> "BLT" // Blót Day
+                3 -> "FLD" // Field Day
+                else -> "${holiday.abbreviation}$dayNumber"
+            }
+            "MID" -> when (dayNumber) {
+                1 -> "MID" // Midsummer
+                2 -> "SUN" // Sun Day
+                3 -> "LIT" // Light Day
+                else -> "${holiday.abbreviation}$dayNumber"
+            }
+            "WIN" -> when (dayNumber) {
+                1 -> "WIN" // Winter Nights
+                2 -> "ANX" // Ancestor Day
+                3 -> "DIS" // Disablót
+                else -> "${holiday.abbreviation}$dayNumber"
+            }
+            else -> "${holiday.abbreviation}$dayNumber"
+        }
     }
 
     /**
