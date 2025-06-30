@@ -4,5 +4,6 @@ data class EddaChapter(
     val title: String,
     val subtitle: String,
     val content: String,
-    var isExpanded: Boolean = false
+    var isExpanded: Boolean = false,
+    val isHeader: Boolean = false
 ) 

@@ -3,6 +3,8 @@ SIGRBLÓT
 The Victory Blót
 --
 
+CALENDAR TAG: SIGR
+
 FOCAL GOD: Óðinn
 
 This is a blót for victory, with Óðinn as the central figure. He is known by names such as Sigrfoðr ("Father of Victory") and is the god who grants strength and success in battle.
@@ -33,6 +35,8 @@ The Sigrblót embodies the Norse warrior spirit and the understanding that victo
 GÓABLÓT
 The Martial Peace Blót
 --
+
+CALENDAR TAG: GOA
 
 FOCAL PURPOSE: Martial Peace
 
@@ -68,6 +72,8 @@ The Góablót represents the Norse understanding that peace is not merely the ab
 GEFJONARBLÓT
 The Revelation Blót
 --
+
+CALENDAR TAG: GEFJ
 
 FOCAL GODDESS: Gefjon
 

@@ -1,0 +1,26 @@
+--
+About
+This Mythotechnical Calendar Application
+--
+
+This app was forked from Simple Calendar Pro but heavily modified and pared back by me STARKADR. You might still discover weird oddities from that original app so be patient I'm hunting it all down. This is a Mythotechnical application intended for the newcomer and experienced practitioner of Forn Sidr.
+
+The main core of this app is an algorithmic lunisolar calendar. This is to say it is a calendar based on the cycles of the moon checked by solar features, this is called the Metonic cycle. The Metonic cycle is a period of 19 years that within it the cycles of the moon perfectly repeat, various cultures exploit this for calendrical systems and the Germanic peoples were no different.
+
+Each month starts on a full moon, thats the gist of it. The Month (the word Month literally sources from mooon,) lasts a lunation of 29-30 days. To properly mesh the Metonic cycle accurately every few years a 13th month is added ensuring accuracy.
+
+From this calendar system we seek to utilize the movements of the sky given to us by the Gods to pinpoint when to perform rituals. Full moons being specifically important (new moons as well but we're focusing on the full moons for now.)
+
+A secondary function of this app is a kickstarter beginners guide. Within the hamburger side menu you'll see various categories, start at the beginners guide and go from there, it'll get you practicing same day. It is essentially a boiled down version of a book I wrote PRAXIS (link below) to help newcomers start with zero difficulties. It's at a price where I make zero commission and I always offer to anyone a free copy if cost is a problem.
+
+Otherwise this is a hobbyist project, hodgepodge, and janky. I am not a professional programmer, there will be bugs, I will get to them at some point or as it is FOSS some better coder will take charge. I personally am just some guy associated with no-one, I write on Substack and you can find me elsewhere if you're savvy, nonetheless enjoy the app and hopefully it is of some use.
+
+--
+Links & Resources
+--
+
+SUBSTACK: https://substack.com/@starkadr
+
+PRAXIS BOOK: https://a.co/d/bfpPKyO
+
+GITHUB: https://github.com/starkadr9 

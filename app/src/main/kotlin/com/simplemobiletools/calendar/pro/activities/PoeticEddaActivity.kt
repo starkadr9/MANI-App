@@ -99,31 +99,67 @@ class PoeticEddaActivity : SimpleActivity() {
         var currentSubtitle = ""
         var currentContent = StringBuilder()
         var inHeader = false
+        var inMajorHeader = false
         var headerLineCount = 0
+        var isCurrentHeader = false
         
         for (line in lines) {
             when {
-                line.trim() == "--" -> {
-                    if (inHeader) {
-                        // End of header section, start collecting content
-                        inHeader = false
+                line.trim() == "---" -> {
+                    if (inMajorHeader) {
+                        // End of major header section
+                        if (currentTitle.isNotEmpty()) {
+                            chapters.add(EddaChapter(currentTitle, "", "", false, true))
+                        }
+                        inMajorHeader = false
                         headerLineCount = 0
+                        currentTitle = ""
+                        currentSubtitle = ""
+                        currentContent = StringBuilder()
                     } else {
                         // Save previous chapter if exists
-                        if (currentTitle.isNotEmpty()) {
+                        if (currentTitle.isNotEmpty() && !isCurrentHeader) {
                             chapters.add(EddaChapter(currentTitle, currentSubtitle, currentContent.toString().trim()))
                         }
                         
-                        // Start of new header section
+                        // Start of new major header section
+                        inMajorHeader = true
+                        headerLineCount = 0
+                        currentTitle = ""
+                        currentSubtitle = ""
+                        currentContent = StringBuilder()
+                        isCurrentHeader = true
+                    }
+                }
+                line.trim() == "--" -> {
+                    if (inHeader) {
+                        // End of regular header section, start collecting content
+                        inHeader = false
+                        headerLineCount = 0
+                        isCurrentHeader = false
+                    } else {
+                        // Save previous chapter if exists
+                        if (currentTitle.isNotEmpty() && !isCurrentHeader) {
+                            chapters.add(EddaChapter(currentTitle, currentSubtitle, currentContent.toString().trim()))
+                        }
+                        
+                        // Start of new regular header section
                         inHeader = true
                         headerLineCount = 0
                         currentTitle = ""
                         currentSubtitle = ""
                         currentContent = StringBuilder()
+                        isCurrentHeader = false
+                    }
+                }
+                inMajorHeader -> {
+                    // We're inside a major header section (---)
+                    if (line.trim().isNotEmpty() && currentTitle.isEmpty()) {
+                        currentTitle = line.trim()
                     }
                 }
                 inHeader -> {
-                    // We're inside a header section
+                    // We're inside a regular header section (--)
                     when (headerLineCount) {
                         0 -> {
                             if (line.trim().isNotEmpty()) {
@@ -140,7 +176,7 @@ class PoeticEddaActivity : SimpleActivity() {
                         // Ignore any additional lines in header until closing --
                     }
                 }
-                !inHeader && currentTitle.isNotEmpty() -> {
+                !inHeader && !inMajorHeader && currentTitle.isNotEmpty() && !isCurrentHeader -> {
                     // We're collecting content for the current chapter
                     currentContent.append(line).append("\n")
                 }
@@ -148,7 +184,7 @@ class PoeticEddaActivity : SimpleActivity() {
         }
         
         // Don't forget the last chapter
-        if (currentTitle.isNotEmpty()) {
+        if (currentTitle.isNotEmpty() && !isCurrentHeader) {
             chapters.add(EddaChapter(currentTitle, currentSubtitle, currentContent.toString().trim()))
         }
         

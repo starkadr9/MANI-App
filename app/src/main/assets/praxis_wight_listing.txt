@@ -1,22 +1,393 @@
+---
+The Gods – Aesir and Vanir
+---
+
 --
-Wight Listing
-A Comprehensive Guide to Norse Spiritual Beings
+Odin
 --
-This section will contain a comprehensive listing and description of the various Wights (spiritual beings) encountered in Norse tradition, organized by category and region.
+Highest of the Gods, Allfather, one-eyed God, easily has over a hundred names.
+• Domains: Kingship, Fatherhood, Wisdom, Poetry, War, Death, Inspiration, Frenzy.
+• Symbols: Ravens, Spears, Wolves, Bears, Ansuz.
 
-COMING SOON:
+--
+Frigga
+--
+Wife of Odin, mother to many Gods.
+• Domains: Motherhood, Prophecy, Marriage, Wisdom, Home, Social Order, Fertility.
+• Symbols: Keys, Distaff, Looms.
 
-• The Aesir: Major Gods and their domains
-• The Vanir: Fertility deities and nature spirits  
-• Land-wights (Landvaettr): Guardians of specific places
-• House-wights (Husvaettr): Domestic spiritual guardians
-• Sea-wights: Ocean and coastal spirits
-• Forest-wights: Woodland spiritual beings
-• Mountain-wights: Spirits of peaks and high places
-• River and Lake-wights: Freshwater guardians
-• Ancestors (Alfar & Disir): Your spiritual lineage
-• Trolls and Giants: Chaotic forces of nature
-• Regional Variations: Local traditions and names
+--
+Lodurr
+--
+Brother to Odin, one of the orderers of the Universe.
+• Domains: Time, Elemental Fire.
+• Symbols: Fire, Blood.
 
-This comprehensive guide will help you identify and properly interact with the various spiritual entities you may encounter in your practice.
+--
+Hoenir
+--
+Brother to Odin, one of the orderers of the Universe.
+• Domains: Ritual, Sacrifice, Elemental Water.
+• Symbols: Marshes, Storks, Swans, Mud, Water.
+
+--
+Thor
+--
+Son of Odin, friend to man, enemy of Thurses.
+• Domains: Storm, Protection, Fertility, Hallowing, Strength, Determination, Courage.
+• Symbols: Goats, Hammer, Belt, Lightning.
+
+--
+Tyr
+--
+Son of Odin, binder of Fenrir, one handed God.
+• Domains: Justice, Courage, Warfare, Oaths, Self-Sacrifice, Protection.
+• Symbols: Tiwaz rune, Sword, One hand.
+
+--
+Baldr
+--
+Son of Odin, reborn God, beloved of the Gods.
+• Domains: Light, Innocence, Beauty, Joy, Purity, Peace, Hope, Rebirth.
+• Symbols: Mistletoe, Draupnir (rings).
+
+--
+Nanna
+--
+Wife of Baldr, mother to Forseti.
+• Domains: Grief, Courage, Loyalty.
+• Symbols: Linen, Rings, Comb.
+
+--
+Freyja
+--
+Daughter of Njordr, Valkyrie goddess.
+• Domains: Love, Beauty, Fertility, Sex, Springtime, Magic, Death.
+• Symbols: Gold, Brisingamen (necklace), Cats, Falcons.
+
+--
+Freyr
+--
+Son of Njordr, kingly Frey, well renowned Vanir.
+• Domains: Kingship, Fertility, Peace, Prosperity, Harvest, Weather, Love, Pleasure.
+• Symbols: Golden Boar, Horses, Sword, Antler, Ingwaz.
+
+--
+Bragi
+--
+Son of Odin, the Skald-God, rune-carved tongue.
+• Domains: Poetry, Pride, Musical Art.
+• Symbols: Music, Poems, Harp.
+
+--
+Idunna
+--
+Wife of Bragi, bringer of eternal youth.
+• Domains: Youth, Rebirth, Life.
+• Symbols: Golden Apples.
+
+--
+Heimdallr
+--
+Son of Odin, guardian of Bifrost, the White God, bringer of culture.
+• Domains: Protection, Boundaries, Holy Fire, Culture, Teaching, Social Order.
+• Symbols: Gjallarhjorn (horn), Bifrost, White.
+
+--
+Forseti
+--
+Son of Baldr, god of courts.
+• Domains: Arguments, Lawsuits, Legal Justice.
+• Symbols: Golden axe.
+
+--
+Mimir
+--
+Wisest of the Gods, the beheaded god.
+• Domains: Knowledge, Intelligence, Wisdom.
+• Symbols: Mead, Spring, Head.
+
+--
+Fulla
+--
+Handmaid of Frigga.
+• Domains: Loyalty, Secrets, Confiding.
+• Symbols: Golden hairband.
+
+--
+Gefjun
+--
+Ploughing Goddess, patron Goddess of Zealand. Possibly Urdr.
+• Domains: Agriculture, Good Luck, Prophecy, Virgins, Virtue.
+• Symbols: Plough, Oxen.
+
+--
+Eir
+--
+Goddess of healing, handmaiden to Mengloth who is likely Freyja.
+• Domains: Healing, Physicians.
+• Symbols: Medicinal Herbs, Mortar and Pestle.
+
+--
+Hodr
+--
+Son of Odin, the blind god, accidental killer of Baldr.
+• Domains: War, Darkness, Winter, Blindness.
+• Symbols: Blindfold, Closed Eyes.
+
+--
+Vali
+--
+Son of Odin, avenger of Baldr.
+• Domains: Revenge, Archery, Duty.
+• Symbols: Bow, Bones.
+
+--
+Vidarr
+--
+Son of Odin, avenger of Odin.
+• Domains: Vengeance, Silence, Dependability, Duty.
+• Symbols: Iron Shoe.
+
+--
+Njordr
+--
+Major god of the Vanir, sea lord.
+• Domains: Water, Seamanship, Good Harvest, Fishing, Peace, Fertility.
+• Symbols: Fish, Ships, Nets.
+
+--
+Ullr
+--
+Stepson of Thor, the glorious winter God, patron of the hunt.
+• Domains: Hunting, Glory, Winter, Skiing, Ranged Weaponry.
+• Symbols: Bow, Skis, Yew.
+
+--
+Skathi
+--
+Jotunn Goddess, wife of Njordr, winter huntress.
+• Domains: Hunting, Winter, Skiing, Familial Protection.
+• Symbols: Skis, Bow, Snowshoes.
+
+--
+Volundr
+--
+Godly or at least near-divine smith. (Not specifically mentioned as a god but has an entire section in the Poetic Edda, and there is no other smith specific God.)
+• Domains: Crafting, Revenge, Smithing, Creating.
+• Symbols: Anvil, Forge, Golden Wings.
+
+--
+Sif
+--
+Wife of Thor.
+• Domains: Family, Peace, Stability, Comfort, Harvest, Fertility.
+• Symbols: Wheat, Gold, Rowan.
+
+--
+Var
+--
+Minor goddess related to oaths.
+• Domains: Marriage, Contracts, Oathkeeping, Vengeance.
+• Symbols: Oath-Ring.
+
+--
+Saga
+--
+Minor goddess of prophecy, potentially conflated with Frigga.
+• Domains: History, Poetry, Remembrance, Prophecy.
+• Symbols: Gold Cup.
+
+--
+Snotra
+--
+Minor goddess associated with wisdom.
+• Domains: Cleverness, Courtesy, Wisdom.
+• Symbols: Mouth, Book.
+
+--
+Sjofn
+--
+Minor goddess associated with love and marriage.
+• Domains: Peace, Love, Marriage.
+• Symbols: Heart.
+
+--
+Hlin
+--
+Minor goddess associated with protection.
+• Domains: Salvation, Protection, Aid.
+• Symbols: Maple Tree.
+
+--
+Syn
+--
+Minor goddess associated with boundaries as well as lies/legal defense.
+• Domains: Protection, Boundaries, Legal Defense.
+• Symbols: Barred Doorway.
+
+--
+Modi
+--
+Son of Thor.
+• Domains: Rage, Bloodlust, Berserker, Wrath.
+• Symbols: [No attestations].
+
+--
+Magni
+--
+Son of Thor, strongest of all the gods.
+• Domains: Raw Strength.
+• Symbols: Gullfaxi (Golden Horse).
+
+--
+Thrudr
+--
+Daughter of Thor.
+• Domains: Feminine Strength [Only referred to in passing].
+• Symbols: [No attestations].
+
+--
+Mani
+--
+The masculine personification of the Moon.
+• Domains: The Moon, Tidal Forces.
+• Symbols: The Moon.
+
+--
+Sol
+--
+The feminine personification of the Sun.
+• Domains: The Sun, Life.
+• Symbols: The Sun.
+
+--
+Natt
+--
+The feminine personification of the Night.
+• Domains: The Night, Rest, Motherhood, Darkness.
+• Symbols: Hrimfaxi (frost mane), Stars.
+
+--
+Dellingr
+--
+The masculine personification of the Dawn.
+• Domains: Dawn, Rebirth, Springtime.
+• Symbols: The Rising Sun.
+
+--
+Dagr
+--
+The masculine personification of the Day.
+• Domains: Day, Light, Life.
+• Symbols: Skinfaxi (shining mane).
+
+--
+Elli
+--
+Personification of old age, might be more of a neutral being than a goddess.
+• Domains: Aging.
+• Symbols: [None attested].
+
+--
+Hnoss
+--
+Daughter of Freyja.
+• Domains: Youth, Beauty.
+• Symbols: Gems.
+
+--
+Hemodr
+--
+Son of Odin, the messenger God.
+• Domains: Communication, Messages.
+• Symbols: Horse.
+
+---
+Lesser Wights
+---
+
+--
+Alfar
+--
+The elves, can refer to nondescript higher Wights below the Gods, also variants can be Dwarves (mischievous divine craftsmen), also can refer to male ancestors. Obviously very unclear what exactly these beings are.
+
+--
+Disir
+--
+Similarly this word plays double duty. It can be used in regard to female Goddesses (the Dis of the Aesir) but it also can relate to female ancestors.
+
+--
+Valkyrie
+--
+Female psychopomps (beings that guide a spirit to an afterlife), generally attributed to the battle dead being picked to go towards Valhalla (a very niche outcome).
+
+--
+Landvaettr
+--
+General term for landwights, as explained above these can be all sorts of different smaller divine spirits.
+
+• Husvaettr: Term for house specific lesser wights.
+• Sjovaettr: (Modern) Term for specific spirits of the ocean.
+• Fjallvaettr: (Modern) Term for specific spirits of the mountains.
+• Skogvaettr: (Modern) Term for specific spirits of the forests.
+• Vatnavaettr: (Modern) Term for specific spirits of lakes and rivers.
+
+---
+Illr – Evil Beings
+---
+
+--
+Mare
+--
+From where we get the term nightmare, also associated heavily with the sleep paralysis phenomena. If you've ever had sleep paralysis you've likely literally seen one before.
+
+--
+Draugr
+--
+Unquiet, hateful dead. They are far from the typical Hollywood zombie, and are a dangerous force all Germanic peoples feared, thus they ensured proper burial practices were followed.
+
+--
+Jormungandr
+--
+The world serpent that bounds our material realm. Kills Thor but killed by Thor.
+
+--
+Fenrir
+--
+The malicious wolf, bound by Tyr's sacrifice, released on Ragnarok and kills Odin killed by Vidarr.
+
+--
+Loki
+--
+The betrayer and enemy of the Gods. Deceiver, perpetuator of chaos, and the evil masculine force. Participates in the end of the world. Kills and killed by Heimdallr.
+
+--
+Gullveig
+--
+Thrice burned witch, enemy of the Gods. Similar to Loki a deceiver and perpetuator of chaos, the feminine counterpart. Associated with manipulation, poison, subversion. Catalyst for the primal Aesir-Vanir war.
+
+--
+Hrimthurses
+--
+While all Hrimthurses (frost giants) are Jotnar (giants) not all Jotnar are Hrimthurses. The Hrimthurses are the specifically evil Jotnar associated with chaotic forces and disease.
+
+--
+Surtr
+--
+The horrible fire jotunn, lord of the otherwise unattested fire giants. Destroyer of the universe, harbinger of the end of all things, and wielding a flaming sword. Fights Freyr but the outcome is uncertain. Nonetheless Loki and Surtr destroy the universe and leads to the cycle of existence beginning again.
+
+---
+Others
+---
+
+--
+Norns
+--
+Uncertain beings, nonetheless three are attested Urdr (past), Verdandi (present), and Skuld (future). Their ability to bind even the Gods to fate imply their otherness as something outside and even more powerful than the Gods.
+
+--
+Jotnar
+--
+At best neutral primal beings, many are the evil Hrimthurses, but a select few are either parents to Gods, or directly honored as Gods themselves. Generally called Giants but they're really similar beings to the Gods just not specifically benevolent as the Gods are.
 

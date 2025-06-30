@@ -7,6 +7,7 @@ import android.content.Intent
 import android.media.AudioManager
 import android.media.RingtoneManager
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -128,6 +129,112 @@ class SettingsActivity : SimpleActivity() {
             binding.settingsMigratingLabel
         ).forEach {
             it.setTextColor(getProperPrimaryColor())
+        }
+        
+        // NORSE MOD: Hide most settings sections (non-destructive - set SHOW_ALL_SETTINGS = true to restore)
+        hideUnnecessarySettings()
+    }
+    
+    private fun hideUnnecessarySettings() {
+        // Set this to true to restore all settings (non-destructive approach)
+        val SHOW_ALL_SETTINGS = false
+        
+        if (!SHOW_ALL_SETTINGS) {
+            // Hide entire sections we don't want (keep only Color Customization and Lunisolar)
+            hideSettingsSection("general")
+            hideSettingsSection("reminders")
+            hideSettingsSection("caldav")
+            hideSettingsSection("new_events") 
+            hideSettingsSection("monthly_view")
+            hideSettingsSection("event_lists")
+            hideSettingsSection("events")
+            hideSettingsSection("tasks")
+            hideSettingsSection("backups")
+            hideSettingsSection("migrating")
+            
+            // Hide specific individual settings that would break the app
+            hideSettingsSection("dangerous_toggles")
+        }
+    }
+    
+    private fun hideSettingsSection(sectionName: String) {
+        when (sectionName) {
+            "general" -> {
+                binding.settingsGeneralSettingsLabel.visibility = View.GONE
+                binding.settingsUseEnglishHolder.visibility = View.GONE
+                binding.settingsLanguageHolder.visibility = View.GONE
+                binding.settingsManageEventTypesHolder.visibility = View.GONE
+                binding.settingsManageQuickFilterEventTypesHolder.visibility = View.GONE
+                binding.settingsStartWeekOnHolder.visibility = View.GONE
+                binding.settingsHourFormatHolder.visibility = View.GONE
+                binding.settingsHighlightWeekendsHolder.visibility = View.GONE
+                binding.settingsHighlightWeekendsColorHolder.visibility = View.GONE
+                binding.settingsAllowCreatingTasksHolder.visibility = View.GONE
+                binding.settingsCustomizeNotificationsHolder.visibility = View.GONE
+            }
+            "reminders" -> {
+                binding.settingsRemindersLabel.visibility = View.GONE
+                binding.settingsVibrateHolder.visibility = View.GONE
+                binding.settingsReminderSoundHolder.visibility = View.GONE
+                binding.settingsReminderAudioStreamHolder.visibility = View.GONE
+                binding.settingsUseSameSnoozeHolder.visibility = View.GONE
+                binding.settingsLoopRemindersHolder.visibility = View.GONE
+                binding.settingsSnoozeTimeHolder.visibility = View.GONE
+            }
+            "caldav" -> {
+                binding.settingsCaldavLabel.visibility = View.GONE
+                binding.settingsCaldavSyncHolder.visibility = View.GONE
+                binding.settingsManageSyncedCalendarsHolder.visibility = View.GONE
+            }
+            "new_events" -> {
+                binding.settingsNewEventsLabel.visibility = View.GONE
+                binding.settingsDefaultStartTimeHolder.visibility = View.GONE
+                binding.settingsDefaultDurationHolder.visibility = View.GONE
+                binding.settingsDefaultEventTypeHolder.visibility = View.GONE
+                binding.settingsCaldavPullToRefreshHolder.visibility = View.GONE
+                binding.settingsDefaultReminder1Holder.visibility = View.GONE
+                binding.settingsDefaultReminder2Holder.visibility = View.GONE
+                binding.settingsDefaultReminder3Holder.visibility = View.GONE
+            }
+            "monthly_view" -> {
+                binding.settingsMonthlyViewLabel.visibility = View.GONE
+                binding.settingsWeekNumbersHolder.visibility = View.GONE
+                binding.settingsShowGridHolder.visibility = View.GONE
+            }
+            "event_lists" -> {
+                binding.settingsEventListsLabel.visibility = View.GONE
+                binding.settingsDisplayPastEventsHolder.visibility = View.GONE
+                binding.settingsReplaceDescriptionHolder.visibility = View.GONE
+                binding.settingsDisplayDescriptionHolder.visibility = View.GONE
+            }
+            "events" -> {
+                binding.settingsEventsLabel.visibility = View.GONE
+                binding.settingsDimPastEventsHolder.visibility = View.GONE
+                binding.settingsDeleteAllEventsHolder.visibility = View.GONE
+                binding.settingsAllowChangingTimeZonesHolder.visibility = View.GONE
+            }
+            "tasks" -> {
+                binding.settingsTasksLabel.visibility = View.GONE
+                binding.settingsDimCompletedTasksHolder.visibility = View.GONE
+            }
+            "backups" -> {
+                binding.settingsBackupsLabel.visibility = View.GONE
+                binding.settingsEnableAutomaticBackupsHolder.visibility = View.GONE
+                binding.settingsManageAutomaticBackupsHolder.visibility = View.GONE
+                binding.settingsExportHolder.visibility = View.GONE
+                binding.settingsImportHolder.visibility = View.GONE
+            }
+            "migrating" -> {
+                binding.settingsMigratingLabel.visibility = View.GONE
+                binding.eventsExportHolder.visibility = View.GONE
+                binding.eventsImportHolder.visibility = View.GONE
+            }
+            "dangerous_toggles" -> {
+                // Hide the lunisolar calendar toggle (would crash if disabled) 
+                binding.settingsLunisolarCalendarHolder.visibility = View.GONE
+                // Hide the "use last event reminders" setting
+                binding.settingsUseLastEventRemindersHolder.visibility = View.GONE
+            }
         }
     }
 

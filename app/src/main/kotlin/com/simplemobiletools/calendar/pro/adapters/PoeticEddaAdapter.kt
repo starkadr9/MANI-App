@@ -1,5 +1,7 @@
 package com.simplemobiletools.calendar.pro.adapters
 
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,24 +38,56 @@ class PoeticEddaAdapter(
         fun bind(chapter: EddaChapter) {
             binding.apply {
                 chapterTitle.text = chapter.title
-                chapterSubtitle.text = chapter.subtitle
-                chapterTitle.setTextColor(primaryColor)
-                chapterSubtitle.setTextColor(textColor)
-                chapterContent.setTextColor(textColor)
-
-                if (chapter.isExpanded) {
-                    chapterContent.text = chapter.content
-                    chapterContent.visibility = View.VISIBLE
-                    expandIcon.rotation = 180f
-                } else {
+                
+                if (chapter.isHeader) {
+                    // This is a major category header
+                    chapterTitle.setTextColor(primaryColor)
+                    chapterTitle.textSize = 18f
+                    chapterTitle.setTypeface(null, android.graphics.Typeface.BOLD)
+                    chapterSubtitle.visibility = View.GONE
                     chapterContent.visibility = View.GONE
-                    expandIcon.rotation = 0f
-                }
+                    expandIcon.visibility = View.GONE
+                    
+                    // Make non-clickable
+                    root.setOnClickListener(null)
+                    root.isClickable = false
+                } else {
+                    // This is a regular collapsible section
+                    chapterSubtitle.text = chapter.subtitle
+                    chapterTitle.setTextColor(primaryColor)
+                    chapterTitle.textSize = 16f
+                    chapterTitle.setTypeface(null, android.graphics.Typeface.NORMAL)
+                    chapterSubtitle.setTextColor(textColor)
+                    chapterContent.setTextColor(textColor)
+                    
+                    // Show/hide subtitle based on content
+                    if (chapter.subtitle.isNotEmpty()) {
+                        chapterSubtitle.visibility = View.VISIBLE
+                    } else {
+                        chapterSubtitle.visibility = View.GONE
+                    }
+                    
+                    expandIcon.visibility = View.VISIBLE
 
-                root.setOnClickListener {
-                    chapter.isExpanded = !chapter.isExpanded
-                    notifyItemChanged(adapterPosition)
-                    itemClick(chapter)
+                    if (chapter.isExpanded) {
+                        chapterContent.text = chapter.content
+                        chapterContent.visibility = View.VISIBLE
+                        expandIcon.rotation = 180f
+                        
+                        // Make links clickable
+                        Linkify.addLinks(chapterContent, Linkify.WEB_URLS)
+                        chapterContent.movementMethod = LinkMovementMethod.getInstance()
+                    } else {
+                        chapterContent.visibility = View.GONE
+                        expandIcon.rotation = 0f
+                    }
+
+                    root.setOnClickListener {
+                        chapter.isExpanded = !chapter.isExpanded
+                        notifyItemChanged(adapterPosition)
+                        itemClick(chapter)
+                    }
+                    root.isClickable = true
                 }
             }
         }

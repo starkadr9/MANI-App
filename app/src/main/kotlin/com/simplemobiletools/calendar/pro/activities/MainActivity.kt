@@ -88,6 +88,19 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // NORSE MOD: Disable all potential rating/promotional dialogs
+        // This prevents any launch counting or promotional popups from the commons library
+        
+        // Override any potential rating dialog settings
+        try {
+            // Disable rating dialog via config if available
+            config.wasAppRated = true
+            config.appRunCount = 999  // Set high count to avoid "rate after X launches" logic
+        } catch (e: Exception) {
+            // Config properties might not exist in this version, ignore
+        }
+        
         setContentView(binding.root)
         appLaunched(BuildConfig.APPLICATION_ID)
         setupOptionsMenu()
@@ -145,7 +158,8 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             updateViewPager()
         }
 
-        checkAppOnSDCard()
+        // NORSE MOD: Disabled rating popup and SD card check
+        // checkAppOnSDCard()
 
         if (savedInstanceState == null) {
             checkCalDAVUpdateListener()
@@ -172,6 +186,8 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
     override fun onResume() {
         super.onResume()
+        
+        // NORSE MOD: Additional protection against rating dialogs
         if (mStoredTextColor != getProperTextColor() || mStoredBackgroundColor != getProperBackgroundColor() || mStoredPrimaryColor != getProperPrimaryColor()
             || mStoredDayCode != Formatter.getTodayCode() || mStoredDimPastEvents != config.dimPastEvents || mStoredDimCompletedTasks != config.dimCompletedTasks
             || mStoredHighlightWeekends != config.highlightWeekends || mStoredHighlightWeekendsColor != config.highlightWeekendsColor
@@ -1013,6 +1029,15 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
                 // Settings at the top
                 R.id.nav_settings -> {
                     launchSettings()
+                    true
+                }
+                
+                // About section
+                R.id.nav_about -> {
+                    val intent = Intent(this, PoeticEddaActivity::class.java)
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TEXT_FILE, "about.txt")
+                    intent.putExtra(PoeticEddaActivity.EXTRA_TITLE, "About")
+                    startActivity(intent)
                     true
                 }
                 
