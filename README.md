@@ -1,67 +1,183 @@
-# Simple Calendar
-<img alt="Logo" src="graphics/icon.png" width="120" />
+# MANI - METONIC ALGORITHMIC NIGHTCYCLE INTERFACE (Android)
 
-Simple Calendar 2023 is a highly customizable, offline monthly calendar app for Android. Have an agenda planner in your pocket, designed to do exactly what a personal tiny schedule planner should do in 2023. No complicated features, unnecessary permissions, or ads!  
-***Supports syncing events via Google Calendar
+An Android calendar application displaying a lunisolar calendar based on reconstructed Germanic traditions, calculated using the Metonic cycle and astronomical events.
 
-Download now!
+This application provides a visual calendar interface showing traditional lunar months alongside Gregorian dates, moon phases, and significant astronomical markers like solstices and equinoxes. Built on the foundation of Simple Calendar Pro but extensively modified for lunisolar functionality.
 
-Daily Digital Schedule App: Take Control of Your Time
-Whether you are looking for a work calendar for business, a day planner, an appointment scheduler, or organization and scheduling of single and recurring events like birthdays, anniversary, appointment reminder, or anything else, Simple Calendar 2023 makes it easy to stay organized. The calendar widget has an incredible variety of customization options: customize event reminders, notification appearance, tiny calendar reminders widget, and overall appearance.
+## Features
 
-Schedule Planner: Plan Your Day
-Appointment scheduler, monthly planner, and family organizer in one! Check your upcoming agenda, schedule business meetings, and events & book appointments easily. Reminders will keep you on time and informed on your daily schedule app. This 2023 calendar widget is remarkably easy to use. You can even view everything as a simple list of events rather than in a monthly view, so you know exactly what’s coming up in your life and how to organize and plan your agenda. 
+### Core Calendar Functionality
+- **Lunisolar Calendar System**: Displays lunar months aligned with astronomical events (Winter Solstice, New/Full Moons)
+- **42-Day Consistent Grid**: Always shows 6 weeks × 7 days with previous/next month previews
+- **Astronomical Integration**: Calculates and displays lunar dates corresponding to Gregorian dates
+- **Moon Phase Display**: Shows accurate moon phases for each day with visual icons
+- **Eld Year Calculation**: Displays Germanic epoch-based years alongside traditional dates
 
-Simple Calendar 2023 Features
+### Germanic Holidays & Traditions
+- **Four Major Holidays**: Yule, Sumarmal, Midsummer, Winter Nights
+- **Custom Holiday Names**: 3-day celebrations with meaningful day designations:
+  - **Yule**: YUL → LOG → ASH (Yule Night, Log Day, Ash Day)
+  - **Sumarmal**: SUM → BLT → FLD (Sumarmal, Blót Day, Field Day)
+  - **Midsummer**: MID → SUN → LIT (Midsummer, Sun Day, Light Day)
+  - **Winter Nights**: WIN → ANX → DIS (Winter Nights, Ancestor Day, Disablót)
+- **Seasonal Color Coding**: 
+  - Yule: Red (winter)
+  - Sumarmal: Green (spring)
+  - Midsummer: Orange (summer)
+  - Winter Nights: Blue (fall)
 
-✔️ The Best User Experience  
-➕ No ads or annoying popups, truly great user experience!  
-➕ No internet access is needed, giving you more privacy, security, and stability
+### Modern Calendar Integration
+- **Event System**: Full integration with Android calendar events
+- **Visual Event Indicators**: Dots showing event count (●, ●●, ●●●) with contrasting colors
+- **Clickable Days**: Tap days with events to view detailed information
+- **Multi-day Event Support**: Properly handles events spanning multiple days
 
-✔️ Flexibility for Your Productivity  
-➕ Calendar Widget supports exporting & importing events via .ics files  
-➕ Export settings to .txt files to import to another device  
-➕ Flexible event creation – times, duration, reminders, powerful repetition rules  
-➕ CalDAV support for syncing events via Google Calendar, Microsoft Outlook, Nextcloud, Exchange, etc
+### User Interface
+- **Swipe Navigation**: Swipe left/right to change months
+- **Navigation Drawer**: Hamburger menu for future feature expansion
+- **Responsive Design**: Adapts to different screen sizes and orientations
+- **Theme Integration**: Follows system dark/light theme preferences
+- **Accessibility**: Proper contrast ratios and navigation support
 
-✔️ Personalized Just for You  
-➕ Schedule planner - customize and change sound, looping, audio stream, vibrations  
-➕ Calendar widget - Colorful Calendars and customizable themes  
-➕ Open source tiny calendar, translated into 30+ languages  
-➕ Plan your day with others - ability to share events fast on social media, emails, etc  
-➕ Family Organizer - with hasslefree event duplication, organization, and time management
+### Astronomical Events
+- **Solstices & Equinoxes**: Visual indicators for seasonal transitions
+- **Moon Phase Tracking**: Accurate lunar phase calculations and display
+- **Metonic Cycle Integration**: 19-year cycle calculations for lunar calendar accuracy
 
-✔️ Organization and Time Management  
-➕ Day planner - the agenda planner will help you to organize your day  
-➕ Weekly planner - staying ahead of your busy weekly schedule has never been easier  
-➕ Itinerary manager - business calendar shared between teams at work  
-➕ Appointment scheduler - organize and maintain your agenda with ease  
-➕ Planning app - easy to use personal event, appointment reminder, and schedule planner  
-➕ Plan your day - manage your day with this android schedule planner, event & family organizer
+## Building
 
-✔️ #1 Calendar App  
-➕ Import holidays, contact birthdays, and anniversaries easily  
-➕ Filter personal events quickly by event type  
-➕ Daily schedule and event location, shown on a map  
-➕ Quick business calendar, or personal digital agenda  
-➕ Quickly switch between daily, weekly, monthly, yearly & event views
+### Prerequisites
+- **Android Studio**: Latest stable version (Arctic Fox or newer recommended)
+- **Android SDK**: API level 24+ (Android 7.0) minimum, target API 34+
+- **Kotlin**: Integrated with Android Studio
+- **JDK**: 17 or newer
 
-DOWNLOAD SIMPLE CALENDAR PLANNER – OFFLINE SCHEDULE AND AGENDA PLANNER WITH NO ADS! PLAN YOUR 2023 TIMETABLE!
+### Setup
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/starkadr9/MANI-App.git
+   cd MANI-App
+   ```
 
-<a href="https://f-droid.org/packages/com.simplemobiletools.calendar.pro">Get it on F-Droid</a>
+2. **Open in Android Studio**:
+   - Launch Android Studio
+   - Select "Open an existing project"
+   - Navigate to the cloned directory
+   - Wait for Gradle sync to complete
 
-Support us:  
-IBAN: SK4083300000002000965231  
-Bitcoin: 19Hc8A7sWGud8sP19VXDC5a5j28UyJfpyJ  
-Ethereum: 0xB7a2DD6f2408Bce77334655CF5E7639aE31feb30  
-Litecoin: LYACbHTKaM9ZubKQGxJ4NRyVy1gHUuztRP  
-Bitcoin Cash: qz6dvmhq5vzkcsypxpp2mnur30muxdah4gvulx3y85  
-Tether: 0x250f9cC32863E59b87037a14955Ed64F879653F0  
-<a href="https://paypal.me/SimpleMobileTools?country.x=SK&locale.x=en_US">PayPal</a>  
-<a href="https://www.patreon.com/tiborkaputa">Patreon</a>
+3. **Build the project**:
+   ```bash
+   ./gradlew assembleDebug
+   ```
 
-<div style="display:flex;">
-<img alt="App image" src="fastlane/metadata/android/en-US/images/phoneScreenshots/1_en-US.jpeg" width="30%">
-<img alt="App image" src="fastlane/metadata/android/en-US/images/phoneScreenshots/2_en-US.jpeg" width="30%">
-<img alt="App image" src="fastlane/metadata/android/en-US/images/phoneScreenshots/4_en-US.jpeg" width="30%">
-</div>
+### Build Variants
+- **Core**: Basic functionality without proprietary features
+- **F-Droid**: Open-source compatible build
+- **Prepaid**: Version with premium features
+
+### APK Generation
+```bash
+# Debug APK
+./gradlew assembleDebug
+
+# Release APK (requires signing configuration)
+./gradlew assembleRelease
+```
+
+The generated APK will be located in `app/build/outputs/apk/`
+
+## Installation
+
+### From Source
+1. Build the APK using the instructions above
+2. Enable "Install from Unknown Sources" in Android settings
+3. Install the APK file on your device
+
+### Requirements
+- **Android 7.0** (API level 24) or higher
+- **Storage**: ~20MB for app installation
+- **Permissions**: 
+  - Calendar access (for event integration)
+  - Storage access (for backup/restore)
+
+## Configuration
+
+The application includes extensive customization options:
+
+### Lunisolar Settings
+- **Epoch Configuration**: Adjustable Germanic epoch base year
+- **Month Names**: Customizable lunar month names
+- **Eld Year Display**: Toggle between traditional and Eld year formats
+- **Holiday Names**: Configurable celebration day designations
+
+### Calendar Display
+- **Event Integration**: Control event visibility and indicators
+- **Color Schemes**: Seasonal holiday color customization
+- **Grid Options**: Week number display, highlighting options
+- **Navigation**: Arrow buttons alongside swipe gestures
+
+### Data Management
+- **Event Backup**: Automatic and manual backup of calendar events
+- **Configuration Export**: Save and restore app settings
+- **CalDAV Sync**: Integration with external calendar services
+
+## Technical Details
+
+### Architecture
+- **Base**: Modified Simple Calendar Pro codebase
+- **Language**: Kotlin with Android SDK
+- **UI Framework**: Android Views with Material Design components
+- **Calendar Logic**: Custom lunisolar implementation with Metonic cycle calculations
+- **Database**: Room database for local event storage
+
+### Astronomical Calculations
+Based on algorithms from "Astronomical Algorithms" by Jean Meeus:
+- **Lunar Phase Calculation**: Accurate moon phase determination
+- **Solstice/Equinox Timing**: Precise seasonal transition dates
+- **Metonic Cycle**: 19-year lunar-solar alignment calculations
+- **Germanic Calendar Reconstruction**: Historical astronomical event alignment
+
+### Performance Optimizations
+- **Event Caching**: Efficient loading for 42-day grid coverage
+- **Lazy Loading**: On-demand calculation of complex astronomical data
+- **Memory Management**: Optimized for Android lifecycle and memory constraints
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See the LICENSE file for details.
+
+The original Simple Calendar Pro codebase is also licensed under GPL-3.0, allowing for this derivative work.
+
+## Acknowledgments
+
+- **Simple Mobile Tools**: Original Simple Calendar Pro codebase foundation
+- **Jean Meeus**: "Astronomical Algorithms" for core calculations
+- **Android Community**: Material Design guidelines and best practices
+- **Germanic Historical Research**: Traditional calendar reconstruction sources
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
+
+### Development Setup
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly on multiple Android versions
+5. Submit a pull request
+
+### Areas for Contribution
+- **Localization**: Translation to additional languages
+- **Historical Accuracy**: Refinement of Germanic calendar traditions
+- **Astronomical Precision**: Enhanced celestial event calculations
+- **UI/UX**: Interface improvements and accessibility enhancements
+- **Performance**: Optimization for older Android devices
+
+## Roadmap
+
+- [ ] **Widget Support**: Home screen widgets for quick date reference
+- [ ] **Export Features**: ICS calendar file generation
+- [ ] **Advanced Settings**: More granular customization options
+- [ ] **Historical Dates**: Extended year range support
+- [ ] **Cultural Variants**: Support for other traditional calendar systems
+- [ ] **Tablet Optimization**: Enhanced large-screen layouts
