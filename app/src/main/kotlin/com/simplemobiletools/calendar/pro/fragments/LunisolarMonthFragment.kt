@@ -44,6 +44,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
     private lateinit var nextButton: ImageView
     private lateinit var todayButton: TextView
     private lateinit var calendarGrid: LinearLayout
+    private lateinit var rootView: View
     
     // Event caching for performance
     private var dayEvents = HashMap<String, ArrayList<Event>>()
@@ -52,14 +53,20 @@ class LunisolarMonthFragment : MyFragmentHolder() {
     // Gesture detection for swipe navigation
     private lateinit var gestureDetector: GestureDetector
     
+    // Touch tracking for swipe detection
+    private var touchStartX = 0f
+    private var touchStartY = 0f
+    private var isTouchMoving = false
+    private var touchStartTime = 0L
+    
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_lunisolar_month, container, false)
+        rootView = inflater.inflate(R.layout.fragment_lunisolar_month, container, false)
         
-        monthTitle = view.findViewById(R.id.month_title)
-        prevButton = view.findViewById(R.id.prev_month)
-        nextButton = view.findViewById(R.id.next_month)
-        todayButton = view.findViewById(R.id.today_button)
-        calendarGrid = view.findViewById(R.id.calendar_grid)
+        monthTitle = rootView.findViewById(R.id.month_title)
+        prevButton = rootView.findViewById(R.id.prev_month)
+        nextButton = rootView.findViewById(R.id.next_month)
+        todayButton = rootView.findViewById(R.id.today_button)
+        calendarGrid = rootView.findViewById(R.id.calendar_grid)
         
         // Apply theme colors
         val textColor = requireContext().getProperTextColor()
@@ -85,7 +92,7 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         setupSwipeGestures()
         
         loadEventsAndUpdateDisplay()
-        return view
+        return rootView
     }
     
     override fun onResume() {
@@ -492,11 +499,17 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 }
             }
             
-            // Make day clickable to show events
+            // Make day clickable to show day view (regardless of events)
             dayView.setOnClickListener {
-                if (hasEvents) {
-                    showEventsForDay(dayCode, currentDate)
-                }
+                android.util.Log.d("LunisolarSwipe", "Day view clicked: $dayCode")
+                showDayView(dayCode, currentDate)
+            }
+            
+            // Add touch listener for swipe detection while preserving clicks
+            dayView.setOnTouchListener { _, event ->
+                android.util.Log.d("LunisolarSwipe", "DayView touch: ${event.action}, x=${event.x}, y=${event.y}")
+                handleTouchForSwipeDetection(event)
+                false // Don't consume - let click listeners work
             }
         } else {
             dayView.text = displayText
@@ -505,21 +518,65 @@ class LunisolarMonthFragment : MyFragmentHolder() {
         return dayView
     }
     
-    private fun showEventsForDay(dayCode: String, date: DateTime) {
-        val events = dayEvents[dayCode] ?: return
-        
-        // Launch the default day view to show events
-        // This integrates with the existing event system
-        val intent = Intent(requireContext(), MainActivity::class.java)
-        intent.putExtra("day_code", dayCode)
-        intent.putExtra("view_to_open", 5) // DAILY_VIEW
-        startActivity(intent)
+    private fun showDayView(dayCode: String, date: DateTime) {
+        android.util.Log.d("LunisolarSwipe", "showDayView called: dayCode=$dayCode, date=$date")
+        // Use proper fragment navigation instead of starting new Activity
+        // This allows back button to work correctly
+        (activity as? MainActivity)?.openDayFromMonthly(date)
     }
     
+    private fun handleTouchForSwipeDetection(event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                touchStartX = event.rawX
+                touchStartY = event.rawY
+                touchStartTime = System.currentTimeMillis()
+                isTouchMoving = false
+                android.util.Log.d("LunisolarSwipe", "Touch DOWN: x=${touchStartX}, y=${touchStartY}")
+            }
+            
+            MotionEvent.ACTION_MOVE -> {
+                val deltaX = kotlin.math.abs(event.rawX - touchStartX)
+                val deltaY = kotlin.math.abs(event.rawY - touchStartY)
+                
+                // Mark as moving if significant movement detected
+                if (deltaX > 10 || deltaY > 10) {
+                    isTouchMoving = true
+                    android.util.Log.d("LunisolarSwipe", "Touch MOVE: deltaX=$deltaX, deltaY=$deltaY")
+                }
+            }
+            
+            MotionEvent.ACTION_UP -> {
+                val deltaX = event.rawX - touchStartX
+                val deltaY = event.rawY - touchStartY
+                val deltaTime = System.currentTimeMillis() - touchStartTime
+                
+                android.util.Log.d("LunisolarSwipe", "Touch UP: deltaX=$deltaX, deltaY=$deltaY, deltaTime=$deltaTime, isTouchMoving=$isTouchMoving")
+                
+                // Check for swipe: significant horizontal movement, not too slow, more horizontal than vertical
+                if (isTouchMoving && 
+                    kotlin.math.abs(deltaX) > 80 && 
+                    kotlin.math.abs(deltaX) > kotlin.math.abs(deltaY) && 
+                    deltaTime < 1000) {
+                    
+                    if (deltaX > 0) {
+                        android.util.Log.d("LunisolarSwipe", "SWIPE RIGHT detected - navigating to previous month")
+                        navigateToPreviousMonth()
+                    } else {
+                        android.util.Log.d("LunisolarSwipe", "SWIPE LEFT detected - navigating to next month")
+                        navigateToNextMonth()
+                    }
+                    return true // Swipe detected
+                }
+            }
+        }
+        return false // No swipe detected
+    }
+
     private fun setupSwipeGestures() {
         gestureDetector = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
-            private val SWIPE_THRESHOLD = 100
-            private val SWIPE_VELOCITY_THRESHOLD = 100
+            private val SWIPE_THRESHOLD = 80 // Reduced threshold for better sensitivity
+            private val SWIPE_VELOCITY_THRESHOLD = 80
             
             override fun onFling(
                 e1: MotionEvent?,
@@ -532,29 +589,44 @@ class LunisolarMonthFragment : MyFragmentHolder() {
                 val diffX = e2.x - e1.x
                 val diffY = e2.y - e1.y
                 
+                android.util.Log.d("LunisolarSwipe", "Swipe detected: diffX=$diffX, diffY=${diffY}, velocityX=$velocityX")
+                
                 return if (abs(diffX) > abs(diffY)) {
                     if (abs(diffX) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {
-                            // Swipe right - go to previous month
+                            android.util.Log.d("LunisolarSwipe", "Swipe RIGHT - navigating to previous month")
                             navigateToPreviousMonth()
                         } else {
-                            // Swipe left - go to next month
+                            android.util.Log.d("LunisolarSwipe", "Swipe LEFT - navigating to next month")
                             navigateToNextMonth()
                         }
                         true
                     } else {
+                        android.util.Log.d("LunisolarSwipe", "Swipe too small: diffX=${abs(diffX)}, velocity=${abs(velocityX)}")
                         false
                     }
                 } else {
+                    android.util.Log.d("LunisolarSwipe", "Vertical swipe ignored")
                     false
                 }
             }
+            
+            override fun onDown(e: MotionEvent): Boolean {
+                android.util.Log.d("LunisolarSwipe", "Touch DOWN detected")
+                return true
+            }
         })
         
-        // Apply gesture detection to the calendar grid
+        // Legacy gesture detector approach (kept for debugging comparison)
         calendarGrid.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            false // Allow other touch events to be handled
+            android.util.Log.d("LunisolarSwipe", "CalendarGrid touch event: ${event.action}, x=${event.x}, y=${event.y}")
+            
+            // Let the gesture detector process the event
+            val gestureResult = gestureDetector.onTouchEvent(event)
+            android.util.Log.d("LunisolarSwipe", "Gesture detector result: $gestureResult")
+            
+            // Don't consume - let individual day touch listeners handle swipe detection
+            false
         }
     }
 } 

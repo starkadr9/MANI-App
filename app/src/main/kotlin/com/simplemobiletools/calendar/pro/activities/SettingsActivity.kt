@@ -1187,9 +1187,9 @@ class SettingsActivity : SimpleActivity() {
 
     private fun updateLunisolarMonthNamesText() {
         val currentNames = config.lunisolarMonthNames
-        val defaultGermanic = "Wulf Moon,Horn Moon,Lenting Moon,Eostre Moon,Thrimilce Moon,Æfte Liða,Ære Liða,Weod Moon,Haleg Moon,Winter Moon,Blot Moon,Ære Jól,Æfte Jól"
-        val norse = "Ylir,Mörsugur,Þorri,Góa,Einmánuður,Harpa,Skerpla,Solmánuður,Heyannir,Tvímánuður,Gormánuður,Frermánuður,Jólmánuður"
-        val angloSaxon = "Æfterra Géola,Solmónaþ,Hréþmónaþ,Éostermónaþ,Þrimilcemónaþ,Ærra Liþa,Æfterra Liþa,Weodmónaþ,Háligmónaþ,Winterfylleþ,Blótmónaþ,Ærra Géola,Æfterra Géola"
+        val defaultGermanic = "1,2,3,4,5,6,7,8,9,10,11,12,13"
+        val norse = "January,February,March,April,May,June,July,August,September,October,November,December,Leap Month"
+        val angloSaxon = "Thorri,Goi,Einnmanudr,Sadtid,Eggtid,Solmanudr,Heyannir,Kornskurdarmanudr,Haustmanudr,Gormanudr,Frermanudr,Hrutmanudr,Hlaupmanudr"
         
         binding.settingsLunisolarMonthNames.text = when (currentNames) {
             defaultGermanic -> "Germanic Traditional"

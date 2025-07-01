@@ -275,6 +275,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     }
 
     override fun onBackPressed() {
+        android.util.Log.d("MainActivity", "onBackPressed: currentFragments.size = ${currentFragments.size}")
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else {
@@ -282,8 +283,14 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
             checkSwipeRefreshAvailability()
             when {
                 binding.fabExtendedOverlay.isVisible() -> hideExtendedFab()
-                currentFragments.size > 1 -> removeTopFragment()
-                else -> super.onBackPressed()
+                currentFragments.size > 1 -> {
+                    android.util.Log.d("MainActivity", "Removing top fragment")
+                    removeTopFragment()
+                }
+                else -> {
+                    android.util.Log.d("MainActivity", "Calling super.onBackPressed() - will exit app")
+                    super.onBackPressed()
+                }
             }
         }
     }
@@ -694,19 +701,24 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     }
 
     fun openDayFromMonthly(dateTime: DateTime) {
+        android.util.Log.d("MainActivity", "openDayFromMonthly: currentFragments.size before = ${currentFragments.size}")
         if (currentFragments.last() is DayFragmentsHolder) {
+            android.util.Log.d("MainActivity", "Already showing day view, returning")
             return
         }
 
         val fragment = DayFragmentsHolder()
         currentFragments.add(fragment)
+        android.util.Log.d("MainActivity", "openDayFromMonthly: currentFragments.size after add = ${currentFragments.size}")
         val bundle = Bundle()
         bundle.putString(DAY_CODE, Formatter.getDayCodeFromDateTime(dateTime))
         fragment.arguments = bundle
         try {
             supportFragmentManager.beginTransaction().add(R.id.fragments_holder, fragment).commitNow()
             showBackNavigationArrow()
+            android.util.Log.d("MainActivity", "Day view added successfully")
         } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error adding day view fragment", e)
         }
     }
 
@@ -727,17 +739,27 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
     }
 
     private fun removeTopFragment() {
+        android.util.Log.d("MainActivity", "removeTopFragment: currentFragments.size before = ${currentFragments.size}")
         supportFragmentManager.beginTransaction().remove(currentFragments.last()).commit()
         currentFragments.removeAt(currentFragments.size - 1)
+        android.util.Log.d("MainActivity", "removeTopFragment: currentFragments.size after = ${currentFragments.size}")
         currentFragments.last().apply {
             refreshEvents()
         }
 
         binding.calendarFab.beGoneIf(currentFragments.size == 1 && config.storedView == YEARLY_VIEW)
         if (currentFragments.size > 1) {
+            android.util.Log.d("MainActivity", "Still multiple fragments, showing back arrow")
             showBackNavigationArrow()
         } else {
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            android.util.Log.d("MainActivity", "Back to single fragment, restoring hamburger menu")
+            // Back to main view - restore hamburger menu by resetting the drawer toggle
+            val toggle = ActionBarDrawerToggle(
+                this, binding.drawerLayout, binding.mainToolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close
+            )
+            binding.drawerLayout.addDrawerListener(toggle)
+            toggle.syncState()
         }
     }
 
