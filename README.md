@@ -1,9 +1,7 @@
+![Screenshot_2025-06-30_20-29-32](https://github.com/user-attachments/assets/9335d85f-ec38-47b7-9738-62ab275830a6)
 
-<p align="center">
-![image](https://github.com/user-attachments/assets/87d03783-c26d-4b4b-baf6-12f55e996ac3)
-</p>
-
-# MANI - METONIC ALGORITHMIC NIGHTCYCLE INTERFACE (Android)
+# MANI - METONIC 
+ALGORITHMIC NIGHTCYCLE INTERFACE (Android)
 
 An Android calendar application displaying a lunisolar calendar based on reconstructed Germanic traditions, calculated using the Metonic cycle and astronomical events.
 
