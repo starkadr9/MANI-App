@@ -1,5 +1,7 @@
-![image](https://github.com/user-attachments/assets/87d03783-c26d-4b4b-baf6-12f55e996ac3)
 
+<p align="center">
+![image](https://github.com/user-attachments/assets/87d03783-c26d-4b4b-baf6-12f55e996ac3)
+</p>
 
 # MANI - METONIC ALGORITHMIC NIGHTCYCLE INTERFACE (Android)
 
