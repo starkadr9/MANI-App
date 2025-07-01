@@ -19,15 +19,17 @@ This application provides a visual calendar interface showing traditional lunar 
 ### Germanic Holidays & Traditions
 - **Four Major Holidays**: Yule, Sumarmal, Midsummer, Winter Nights
 - **Custom Holiday Names**: 3-day celebrations with meaningful day designations:
-  - **Yule**
-  - **Sumarmal**
-  - **Midsummer**
-  - **Winter Nights**
 - **Seasonal Color Coding**: 
   - Yule: Red (winter)
   - Sumarmal: Green (spring)
   - Midsummer: Orange (summer)
   - Winter Nights: Blue (fall)
+
+### Beginners Texts
+- **10 Part Beginners Guide**: Boiled down version of my book PRAXIS in the app
+- **Wight Reference**: The Wight reference from my book in the app
+- **Full Poetic Edda**: Full Bellows translation included
+- **Holiday Explainers**: Summaries of the three major festival holidays represented in the app
 
 ### Modern Calendar Integration
 - **Event System**: Full integration with Android calendar events
